@@ -38,7 +38,7 @@ export type FinancialObligationMinAggregateOutputType = {
   id: string | null
   studentId: string | null
   type: $Enums.ObligationType | null
-  descrption: string | null
+  description: string | null
   amount: runtime.Decimal | null
   dueDate: Date | null
   status: $Enums.ObligationStatus | null
@@ -50,7 +50,7 @@ export type FinancialObligationMaxAggregateOutputType = {
   id: string | null
   studentId: string | null
   type: $Enums.ObligationType | null
-  descrption: string | null
+  description: string | null
   amount: runtime.Decimal | null
   dueDate: Date | null
   status: $Enums.ObligationStatus | null
@@ -62,7 +62,7 @@ export type FinancialObligationCountAggregateOutputType = {
   id: number
   studentId: number
   type: number
-  descrption: number
+  description: number
   amount: number
   dueDate: number
   status: number
@@ -84,7 +84,7 @@ export type FinancialObligationMinAggregateInputType = {
   id?: true
   studentId?: true
   type?: true
-  descrption?: true
+  description?: true
   amount?: true
   dueDate?: true
   status?: true
@@ -96,7 +96,7 @@ export type FinancialObligationMaxAggregateInputType = {
   id?: true
   studentId?: true
   type?: true
-  descrption?: true
+  description?: true
   amount?: true
   dueDate?: true
   status?: true
@@ -108,7 +108,7 @@ export type FinancialObligationCountAggregateInputType = {
   id?: true
   studentId?: true
   type?: true
-  descrption?: true
+  description?: true
   amount?: true
   dueDate?: true
   status?: true
@@ -207,7 +207,7 @@ export type FinancialObligationGroupByOutputType = {
   id: string
   studentId: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal
   dueDate: Date
   status: $Enums.ObligationStatus
@@ -242,7 +242,7 @@ export type FinancialObligationWhereInput = {
   id?: Prisma.StringFilter<"FinancialObligation"> | string
   studentId?: Prisma.StringFilter<"FinancialObligation"> | string
   type?: Prisma.EnumObligationTypeFilter<"FinancialObligation"> | $Enums.ObligationType
-  descrption?: Prisma.StringFilter<"FinancialObligation"> | string
+  description?: Prisma.StringFilter<"FinancialObligation"> | string
   amount?: Prisma.DecimalFilter<"FinancialObligation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFilter<"FinancialObligation"> | Date | string
   status?: Prisma.EnumObligationStatusFilter<"FinancialObligation"> | $Enums.ObligationStatus
@@ -256,7 +256,7 @@ export type FinancialObligationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  descrption?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -273,7 +273,7 @@ export type FinancialObligationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.FinancialObligationWhereInput | Prisma.FinancialObligationWhereInput[]
   studentId?: Prisma.StringFilter<"FinancialObligation"> | string
   type?: Prisma.EnumObligationTypeFilter<"FinancialObligation"> | $Enums.ObligationType
-  descrption?: Prisma.StringFilter<"FinancialObligation"> | string
+  description?: Prisma.StringFilter<"FinancialObligation"> | string
   amount?: Prisma.DecimalFilter<"FinancialObligation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFilter<"FinancialObligation"> | Date | string
   status?: Prisma.EnumObligationStatusFilter<"FinancialObligation"> | $Enums.ObligationStatus
@@ -287,7 +287,7 @@ export type FinancialObligationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  descrption?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -307,7 +307,7 @@ export type FinancialObligationScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"FinancialObligation"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"FinancialObligation"> | string
   type?: Prisma.EnumObligationTypeWithAggregatesFilter<"FinancialObligation"> | $Enums.ObligationType
-  descrption?: Prisma.StringWithAggregatesFilter<"FinancialObligation"> | string
+  description?: Prisma.StringWithAggregatesFilter<"FinancialObligation"> | string
   amount?: Prisma.DecimalWithAggregatesFilter<"FinancialObligation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"FinancialObligation"> | Date | string
   status?: Prisma.EnumObligationStatusWithAggregatesFilter<"FinancialObligation"> | $Enums.ObligationStatus
@@ -318,7 +318,7 @@ export type FinancialObligationScalarWhereWithAggregatesInput = {
 export type FinancialObligationCreateInput = {
   id?: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -332,7 +332,7 @@ export type FinancialObligationUncheckedCreateInput = {
   id?: string
   studentId: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -344,7 +344,7 @@ export type FinancialObligationUncheckedCreateInput = {
 export type FinancialObligationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -358,7 +358,7 @@ export type FinancialObligationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -371,7 +371,7 @@ export type FinancialObligationCreateManyInput = {
   id?: string
   studentId: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -382,7 +382,7 @@ export type FinancialObligationCreateManyInput = {
 export type FinancialObligationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -394,7 +394,7 @@ export type FinancialObligationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -416,7 +416,7 @@ export type FinancialObligationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  descrption?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -432,7 +432,7 @@ export type FinancialObligationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  descrption?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -444,7 +444,7 @@ export type FinancialObligationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  descrption?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -528,7 +528,7 @@ export type FinancialObligationUpdateOneRequiredWithoutPaymentsNestedInput = {
 export type FinancialObligationCreateWithoutStudentInput = {
   id?: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -540,7 +540,7 @@ export type FinancialObligationCreateWithoutStudentInput = {
 export type FinancialObligationUncheckedCreateWithoutStudentInput = {
   id?: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -582,7 +582,7 @@ export type FinancialObligationScalarWhereInput = {
   id?: Prisma.StringFilter<"FinancialObligation"> | string
   studentId?: Prisma.StringFilter<"FinancialObligation"> | string
   type?: Prisma.EnumObligationTypeFilter<"FinancialObligation"> | $Enums.ObligationType
-  descrption?: Prisma.StringFilter<"FinancialObligation"> | string
+  description?: Prisma.StringFilter<"FinancialObligation"> | string
   amount?: Prisma.DecimalFilter<"FinancialObligation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFilter<"FinancialObligation"> | Date | string
   status?: Prisma.EnumObligationStatusFilter<"FinancialObligation"> | $Enums.ObligationStatus
@@ -593,7 +593,7 @@ export type FinancialObligationScalarWhereInput = {
 export type FinancialObligationCreateWithoutPaymentsInput = {
   id?: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -606,7 +606,7 @@ export type FinancialObligationUncheckedCreateWithoutPaymentsInput = {
   id?: string
   studentId: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -633,7 +633,7 @@ export type FinancialObligationUpdateToOneWithWhereWithoutPaymentsInput = {
 export type FinancialObligationUpdateWithoutPaymentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -646,7 +646,7 @@ export type FinancialObligationUncheckedUpdateWithoutPaymentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -657,7 +657,7 @@ export type FinancialObligationUncheckedUpdateWithoutPaymentsInput = {
 export type FinancialObligationCreateManyStudentInput = {
   id?: string
   type: $Enums.ObligationType
-  descrption: string
+  description: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate: Date | string
   status?: $Enums.ObligationStatus
@@ -668,7 +668,7 @@ export type FinancialObligationCreateManyStudentInput = {
 export type FinancialObligationUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -680,7 +680,7 @@ export type FinancialObligationUpdateWithoutStudentInput = {
 export type FinancialObligationUncheckedUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -692,7 +692,7 @@ export type FinancialObligationUncheckedUpdateWithoutStudentInput = {
 export type FinancialObligationUncheckedUpdateManyWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumObligationTypeFieldUpdateOperationsInput | $Enums.ObligationType
-  descrption?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.StringFieldUpdateOperationsInput | string
   amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.EnumObligationStatusFieldUpdateOperationsInput | $Enums.ObligationStatus
@@ -735,7 +735,7 @@ export type FinancialObligationSelect<ExtArgs extends runtime.Types.Extensions.I
   id?: boolean
   studentId?: boolean
   type?: boolean
-  descrption?: boolean
+  description?: boolean
   amount?: boolean
   dueDate?: boolean
   status?: boolean
@@ -750,7 +750,7 @@ export type FinancialObligationSelectCreateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   studentId?: boolean
   type?: boolean
-  descrption?: boolean
+  description?: boolean
   amount?: boolean
   dueDate?: boolean
   status?: boolean
@@ -763,7 +763,7 @@ export type FinancialObligationSelectUpdateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   studentId?: boolean
   type?: boolean
-  descrption?: boolean
+  description?: boolean
   amount?: boolean
   dueDate?: boolean
   status?: boolean
@@ -776,7 +776,7 @@ export type FinancialObligationSelectScalar = {
   id?: boolean
   studentId?: boolean
   type?: boolean
-  descrption?: boolean
+  description?: boolean
   amount?: boolean
   dueDate?: boolean
   status?: boolean
@@ -784,7 +784,7 @@ export type FinancialObligationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FinancialObligationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "type" | "descrption" | "amount" | "dueDate" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["financialObligation"]>
+export type FinancialObligationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "type" | "description" | "amount" | "dueDate" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["financialObligation"]>
 export type FinancialObligationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentProfileDefaultArgs<ExtArgs>
   payments?: boolean | Prisma.FinancialObligation$paymentsArgs<ExtArgs>
@@ -807,7 +807,7 @@ export type $FinancialObligationPayload<ExtArgs extends runtime.Types.Extensions
     id: string
     studentId: string
     type: $Enums.ObligationType
-    descrption: string
+    description: string
     amount: runtime.Decimal
     dueDate: Date
     status: $Enums.ObligationStatus
@@ -1241,7 +1241,7 @@ export interface FinancialObligationFieldRefs {
   readonly id: Prisma.FieldRef<"FinancialObligation", 'String'>
   readonly studentId: Prisma.FieldRef<"FinancialObligation", 'String'>
   readonly type: Prisma.FieldRef<"FinancialObligation", 'ObligationType'>
-  readonly descrption: Prisma.FieldRef<"FinancialObligation", 'String'>
+  readonly description: Prisma.FieldRef<"FinancialObligation", 'String'>
   readonly amount: Prisma.FieldRef<"FinancialObligation", 'Decimal'>
   readonly dueDate: Prisma.FieldRef<"FinancialObligation", 'DateTime'>
   readonly status: Prisma.FieldRef<"FinancialObligation", 'ObligationStatus'>

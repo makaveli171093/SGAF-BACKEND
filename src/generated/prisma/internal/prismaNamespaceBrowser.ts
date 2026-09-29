@@ -102,9 +102,9 @@ export const StudentProfileScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
   enrollmentCode: 'enrollmentCode',
-  guardiaName: 'guardiaName',
+  guardianName: 'guardianName',
   guardianPhone: 'guardianPhone',
-  guardiaCi: 'guardiaCi',
+  guardianCi: 'guardianCi',
   createdAt: 'createdAt',
   updateAt: 'updateAt'
 } as const
@@ -222,7 +222,7 @@ export const FinancialObligationScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
   type: 'type',
-  descrption: 'descrption',
+  description: 'description',
   amount: 'amount',
   dueDate: 'dueDate',
   status: 'status',

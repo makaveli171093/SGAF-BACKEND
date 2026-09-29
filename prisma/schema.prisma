@@ -94,9 +94,9 @@ model StudentProfile {
   user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   enrollmentCode String @unique
 
-  guardiaName   String
+  guardianName  String
   guardianPhone String
-  guardiaCi     String?
+  guardianCi    String?
 
   enrollments          Enrollment[]
   submissions          Submission[]
@@ -260,11 +260,11 @@ model FinancialObligation {
   studentId String
   student   StudentProfile @relation(fields: [studentId], references: [id])
 
-  type       ObligationType
-  descrption String
-  amount     Decimal          @db.Decimal(10, 2)
-  dueDate    DateTime
-  status     ObligationStatus @default(PENDING)
+  type        ObligationType
+  description String
+  amount      Decimal          @db.Decimal(10, 2)
+  dueDate     DateTime
+  status      ObligationStatus @default(PENDING)
 
   payments Payment[]
 

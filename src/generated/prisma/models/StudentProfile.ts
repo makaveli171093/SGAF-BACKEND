@@ -28,9 +28,9 @@ export type StudentProfileMinAggregateOutputType = {
   id: string | null
   userId: string | null
   enrollmentCode: string | null
-  guardiaName: string | null
+  guardianName: string | null
   guardianPhone: string | null
-  guardiaCi: string | null
+  guardianCi: string | null
   createdAt: Date | null
   updateAt: Date | null
 }
@@ -39,9 +39,9 @@ export type StudentProfileMaxAggregateOutputType = {
   id: string | null
   userId: string | null
   enrollmentCode: string | null
-  guardiaName: string | null
+  guardianName: string | null
   guardianPhone: string | null
-  guardiaCi: string | null
+  guardianCi: string | null
   createdAt: Date | null
   updateAt: Date | null
 }
@@ -50,9 +50,9 @@ export type StudentProfileCountAggregateOutputType = {
   id: number
   userId: number
   enrollmentCode: number
-  guardiaName: number
+  guardianName: number
   guardianPhone: number
-  guardiaCi: number
+  guardianCi: number
   createdAt: number
   updateAt: number
   _all: number
@@ -63,9 +63,9 @@ export type StudentProfileMinAggregateInputType = {
   id?: true
   userId?: true
   enrollmentCode?: true
-  guardiaName?: true
+  guardianName?: true
   guardianPhone?: true
-  guardiaCi?: true
+  guardianCi?: true
   createdAt?: true
   updateAt?: true
 }
@@ -74,9 +74,9 @@ export type StudentProfileMaxAggregateInputType = {
   id?: true
   userId?: true
   enrollmentCode?: true
-  guardiaName?: true
+  guardianName?: true
   guardianPhone?: true
-  guardiaCi?: true
+  guardianCi?: true
   createdAt?: true
   updateAt?: true
 }
@@ -85,9 +85,9 @@ export type StudentProfileCountAggregateInputType = {
   id?: true
   userId?: true
   enrollmentCode?: true
-  guardiaName?: true
+  guardianName?: true
   guardianPhone?: true
-  guardiaCi?: true
+  guardianCi?: true
   createdAt?: true
   updateAt?: true
   _all?: true
@@ -169,9 +169,9 @@ export type StudentProfileGroupByOutputType = {
   id: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi: string | null
+  guardianCi: string | null
   createdAt: Date
   updateAt: Date
   _count: StudentProfileCountAggregateOutputType | null
@@ -201,9 +201,9 @@ export type StudentProfileWhereInput = {
   id?: Prisma.StringFilter<"StudentProfile"> | string
   userId?: Prisma.StringFilter<"StudentProfile"> | string
   enrollmentCode?: Prisma.StringFilter<"StudentProfile"> | string
-  guardiaName?: Prisma.StringFilter<"StudentProfile"> | string
+  guardianName?: Prisma.StringFilter<"StudentProfile"> | string
   guardianPhone?: Prisma.StringFilter<"StudentProfile"> | string
-  guardiaCi?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  guardianCi?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"StudentProfile"> | Date | string
   updateAt?: Prisma.DateTimeFilter<"StudentProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -216,9 +216,9 @@ export type StudentProfileOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   enrollmentCode?: Prisma.SortOrder
-  guardiaName?: Prisma.SortOrder
+  guardianName?: Prisma.SortOrder
   guardianPhone?: Prisma.SortOrder
-  guardiaCi?: Prisma.SortOrderInput | Prisma.SortOrder
+  guardianCi?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updateAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -234,9 +234,9 @@ export type StudentProfileWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.StudentProfileWhereInput | Prisma.StudentProfileWhereInput[]
   OR?: Prisma.StudentProfileWhereInput[]
   NOT?: Prisma.StudentProfileWhereInput | Prisma.StudentProfileWhereInput[]
-  guardiaName?: Prisma.StringFilter<"StudentProfile"> | string
+  guardianName?: Prisma.StringFilter<"StudentProfile"> | string
   guardianPhone?: Prisma.StringFilter<"StudentProfile"> | string
-  guardiaCi?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
+  guardianCi?: Prisma.StringNullableFilter<"StudentProfile"> | string | null
   createdAt?: Prisma.DateTimeFilter<"StudentProfile"> | Date | string
   updateAt?: Prisma.DateTimeFilter<"StudentProfile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -249,9 +249,9 @@ export type StudentProfileOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   enrollmentCode?: Prisma.SortOrder
-  guardiaName?: Prisma.SortOrder
+  guardianName?: Prisma.SortOrder
   guardianPhone?: Prisma.SortOrder
-  guardiaCi?: Prisma.SortOrderInput | Prisma.SortOrder
+  guardianCi?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updateAt?: Prisma.SortOrder
   _count?: Prisma.StudentProfileCountOrderByAggregateInput
@@ -266,9 +266,9 @@ export type StudentProfileScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
   userId?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
   enrollmentCode?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
-  guardiaName?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
+  guardianName?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
   guardianPhone?: Prisma.StringWithAggregatesFilter<"StudentProfile"> | string
-  guardiaCi?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
+  guardianCi?: Prisma.StringNullableWithAggregatesFilter<"StudentProfile"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StudentProfile"> | Date | string
   updateAt?: Prisma.DateTimeWithAggregatesFilter<"StudentProfile"> | Date | string
 }
@@ -276,9 +276,9 @@ export type StudentProfileScalarWhereWithAggregatesInput = {
 export type StudentProfileCreateInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutStundentProfileInput
@@ -291,9 +291,9 @@ export type StudentProfileUncheckedCreateInput = {
   id?: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -304,9 +304,9 @@ export type StudentProfileUncheckedCreateInput = {
 export type StudentProfileUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutStundentProfileNestedInput
@@ -319,9 +319,9 @@ export type StudentProfileUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -333,9 +333,9 @@ export type StudentProfileCreateManyInput = {
   id?: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
 }
@@ -343,9 +343,9 @@ export type StudentProfileCreateManyInput = {
 export type StudentProfileUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -354,9 +354,9 @@ export type StudentProfileUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -370,9 +370,9 @@ export type StudentProfileCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   enrollmentCode?: Prisma.SortOrder
-  guardiaName?: Prisma.SortOrder
+  guardianName?: Prisma.SortOrder
   guardianPhone?: Prisma.SortOrder
-  guardiaCi?: Prisma.SortOrder
+  guardianCi?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updateAt?: Prisma.SortOrder
 }
@@ -381,9 +381,9 @@ export type StudentProfileMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   enrollmentCode?: Prisma.SortOrder
-  guardiaName?: Prisma.SortOrder
+  guardianName?: Prisma.SortOrder
   guardianPhone?: Prisma.SortOrder
-  guardiaCi?: Prisma.SortOrder
+  guardianCi?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updateAt?: Prisma.SortOrder
 }
@@ -392,9 +392,9 @@ export type StudentProfileMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   enrollmentCode?: Prisma.SortOrder
-  guardiaName?: Prisma.SortOrder
+  guardianName?: Prisma.SortOrder
   guardianPhone?: Prisma.SortOrder
-  guardiaCi?: Prisma.SortOrder
+  guardianCi?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updateAt?: Prisma.SortOrder
 }
@@ -481,9 +481,9 @@ export type StudentProfileUpdateOneRequiredWithoutFinancialObligationsNestedInpu
 export type StudentProfileCreateWithoutUserInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   enrollments?: Prisma.EnrollmentCreateNestedManyWithoutStudentInput
@@ -494,9 +494,9 @@ export type StudentProfileCreateWithoutUserInput = {
 export type StudentProfileUncheckedCreateWithoutUserInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -523,9 +523,9 @@ export type StudentProfileUpdateToOneWithWhereWithoutUserInput = {
 export type StudentProfileUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.EnrollmentUpdateManyWithoutStudentNestedInput
@@ -536,9 +536,9 @@ export type StudentProfileUpdateWithoutUserInput = {
 export type StudentProfileUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -549,9 +549,9 @@ export type StudentProfileUncheckedUpdateWithoutUserInput = {
 export type StudentProfileCreateWithoutEnrollmentsInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutStundentProfileInput
@@ -563,9 +563,9 @@ export type StudentProfileUncheckedCreateWithoutEnrollmentsInput = {
   id?: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   submissions?: Prisma.SubmissionUncheckedCreateNestedManyWithoutStudentInput
@@ -591,9 +591,9 @@ export type StudentProfileUpdateToOneWithWhereWithoutEnrollmentsInput = {
 export type StudentProfileUpdateWithoutEnrollmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutStundentProfileNestedInput
@@ -605,9 +605,9 @@ export type StudentProfileUncheckedUpdateWithoutEnrollmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   submissions?: Prisma.SubmissionUncheckedUpdateManyWithoutStudentNestedInput
@@ -617,9 +617,9 @@ export type StudentProfileUncheckedUpdateWithoutEnrollmentsInput = {
 export type StudentProfileCreateWithoutSubmissionsInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutStundentProfileInput
@@ -631,9 +631,9 @@ export type StudentProfileUncheckedCreateWithoutSubmissionsInput = {
   id?: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -659,9 +659,9 @@ export type StudentProfileUpdateToOneWithWhereWithoutSubmissionsInput = {
 export type StudentProfileUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutStundentProfileNestedInput
@@ -673,9 +673,9 @@ export type StudentProfileUncheckedUpdateWithoutSubmissionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -685,9 +685,9 @@ export type StudentProfileUncheckedUpdateWithoutSubmissionsInput = {
 export type StudentProfileCreateWithoutFinancialObligationsInput = {
   id?: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutStundentProfileInput
@@ -699,9 +699,9 @@ export type StudentProfileUncheckedCreateWithoutFinancialObligationsInput = {
   id?: string
   userId: string
   enrollmentCode: string
-  guardiaName: string
+  guardianName: string
   guardianPhone: string
-  guardiaCi?: string | null
+  guardianCi?: string | null
   createdAt?: Date | string
   updateAt?: Date | string
   enrollments?: Prisma.EnrollmentUncheckedCreateNestedManyWithoutStudentInput
@@ -727,9 +727,9 @@ export type StudentProfileUpdateToOneWithWhereWithoutFinancialObligationsInput =
 export type StudentProfileUpdateWithoutFinancialObligationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutStundentProfileNestedInput
@@ -741,9 +741,9 @@ export type StudentProfileUncheckedUpdateWithoutFinancialObligationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   enrollmentCode?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaName?: Prisma.StringFieldUpdateOperationsInput | string
+  guardianName?: Prisma.StringFieldUpdateOperationsInput | string
   guardianPhone?: Prisma.StringFieldUpdateOperationsInput | string
-  guardiaCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  guardianCi?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updateAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   enrollments?: Prisma.EnrollmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -803,9 +803,9 @@ export type StudentProfileSelect<ExtArgs extends runtime.Types.Extensions.Intern
   id?: boolean
   userId?: boolean
   enrollmentCode?: boolean
-  guardiaName?: boolean
+  guardianName?: boolean
   guardianPhone?: boolean
-  guardiaCi?: boolean
+  guardianCi?: boolean
   createdAt?: boolean
   updateAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -819,9 +819,9 @@ export type StudentProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   userId?: boolean
   enrollmentCode?: boolean
-  guardiaName?: boolean
+  guardianName?: boolean
   guardianPhone?: boolean
-  guardiaCi?: boolean
+  guardianCi?: boolean
   createdAt?: boolean
   updateAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -831,9 +831,9 @@ export type StudentProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   id?: boolean
   userId?: boolean
   enrollmentCode?: boolean
-  guardiaName?: boolean
+  guardianName?: boolean
   guardianPhone?: boolean
-  guardiaCi?: boolean
+  guardianCi?: boolean
   createdAt?: boolean
   updateAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -843,14 +843,14 @@ export type StudentProfileSelectScalar = {
   id?: boolean
   userId?: boolean
   enrollmentCode?: boolean
-  guardiaName?: boolean
+  guardianName?: boolean
   guardianPhone?: boolean
-  guardiaCi?: boolean
+  guardianCi?: boolean
   createdAt?: boolean
   updateAt?: boolean
 }
 
-export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "enrollmentCode" | "guardiaName" | "guardianPhone" | "guardiaCi" | "createdAt" | "updateAt", ExtArgs["result"]["studentProfile"]>
+export type StudentProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "enrollmentCode" | "guardianName" | "guardianPhone" | "guardianCi" | "createdAt" | "updateAt", ExtArgs["result"]["studentProfile"]>
 export type StudentProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   enrollments?: boolean | Prisma.StudentProfile$enrollmentsArgs<ExtArgs>
@@ -877,9 +877,9 @@ export type $StudentProfilePayload<ExtArgs extends runtime.Types.Extensions.Inte
     id: string
     userId: string
     enrollmentCode: string
-    guardiaName: string
+    guardianName: string
     guardianPhone: string
-    guardiaCi: string | null
+    guardianCi: string | null
     createdAt: Date
     updateAt: Date
   }, ExtArgs["result"]["studentProfile"]>
@@ -1312,9 +1312,9 @@ export interface StudentProfileFieldRefs {
   readonly id: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly userId: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly enrollmentCode: Prisma.FieldRef<"StudentProfile", 'String'>
-  readonly guardiaName: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly guardianName: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly guardianPhone: Prisma.FieldRef<"StudentProfile", 'String'>
-  readonly guardiaCi: Prisma.FieldRef<"StudentProfile", 'String'>
+  readonly guardianCi: Prisma.FieldRef<"StudentProfile", 'String'>
   readonly createdAt: Prisma.FieldRef<"StudentProfile", 'DateTime'>
   readonly updateAt: Prisma.FieldRef<"StudentProfile", 'DateTime'>
 }
