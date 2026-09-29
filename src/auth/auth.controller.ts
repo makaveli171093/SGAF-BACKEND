@@ -6,13 +6,17 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { Role } from '../generated/prisma/enums.js';
 import { Roles } from './decorators/roles.decorators.js';
 import { RolesGuard } from './guards/roles.guard.js';
+import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   getProfile(@Req() req: any) {
     return {
       user: req.user,

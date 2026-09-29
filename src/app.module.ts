@@ -6,6 +6,7 @@ import { AppService } from './app.service.js';
 import { envValidationSchema } from './config/env.validation.js';
 import { PrismaModule } from './database/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
+import { UsersModule } from './users/users.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -17,6 +18,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     }),
     PrismaModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -2,10 +2,10 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module.js';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   const configService = app.get(ConfigService);
 
   app.setGlobalPrefix('api/v1');
@@ -17,6 +17,19 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  const swaggerConfig = new DocumentBuilder()
+    .setTitle('SGAF API')
+    .setDescription(
+      'API REST para el Sistema de Gestión Académica y Financiera',
+    )
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+
+  SwaggerModule.setup('api/docs', app, swaggerDocument);
 
   const port = configService.get<number>('PORT', 3000);
 
