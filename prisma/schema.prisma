@@ -1,0 +1,305 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  RECEPCIONIST
+  TEACHER
+  STUDENT
+}
+
+enum UserStatus {
+  PENDING_APPROVAL
+  ACTIVE
+  SUSPEND_FOR_DEBT
+  INACTIVE
+}
+
+enum AcademicPeriodStatus {
+  PLANNED
+  ACTIVE
+  CLOSED
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum EnrollmentStatus {
+  ACTIVE
+  CANCELLED
+}
+
+enum ObligationType {
+  ENROLLMENT
+  MONTHLY_FEE
+  OTHER
+}
+
+enum ObligationStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CACELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  ONLINE
+}
+
+enum Paymentstatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  ci           String     @unique
+  phone        String?
+  role         Role
+  status       UserStatus @default(PENDING_APPROVAL)
+
+  stundentProfile StudentProfile?
+  teacherProfile  TeacherProfile?
+
+  verifiedPayments Payment[] @relation("PaymentVerifier")
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@map("users")
+}
+
+model StudentProfile {
+  id             String @id @default(uuid())
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentCode String @unique
+
+  guardiaName   String
+  guardianPhone String
+  guardiaCi     String?
+
+  enrollments          Enrollment[]
+  submissions          Submission[]
+  financialObligations FinancialObligation[]
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@map("student_profiles")
+}
+
+model TeacherProfile {
+  id String @id @default(uuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  specialty String
+  hireDate  DateTime
+  groups    Group[]
+
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+
+  @@map("teacher_profiles")
+}
+
+model AcademicPeriod {
+  id         String               @id @default(uuid())
+  name       String
+  startDate  DateTime
+  endDate    DateTime
+  maxCredits Int
+  status     AcademicPeriodStatus @default(PLANNED)
+
+  groups Group[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("academic_periods")
+}
+
+model Subject {
+  id   String @id @default(uuid())
+  code String @unique
+  name String
+
+  credits Int
+
+  enrollmentFee Decimal @db.Decimal(10, 2)
+  monthlyFee    Decimal @db.Decimal(10, 2)
+
+  active Boolean @default(true)
+
+  groups Group[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subjects")
+}
+
+model Group {
+  id          String @id @default(uuid())
+  name        String
+  maxCapacity Int
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  academicPeriodId String
+  academicPeriod   AcademicPeriod @relation(fields: [academicPeriodId], references: [id])
+
+  teacherId String
+  teacher   TeacherProfile @relation(fields: [teacherId], references: [id])
+
+  enrollments Enrollment[]
+
+  scheduleBlocks ScheduleBlock[]
+  assignments    Assignment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([academicPeriodId, subjectId, name])
+  @@map("groups")
+}
+
+model ScheduleBlock {
+  id String @id @default(uuid())
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  dayOfWeek DayOfWeek
+  startTime DateTime  @db.Time()
+  endtTime  DateTime  @db.Time()
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  status     EnrollmentStatus @default(ACTIVE)
+  enrolledAt DateTime         @default(now())
+
+  @@unique([studentId, groupId])
+  @@map("enrollments")
+}
+
+model Assignment {
+  id String @id @default(uuid())
+
+  groupId String
+  group   Group  @relation(fields: [groupId], references: [id])
+
+  tittle       String
+  instructions String
+  dueDate      DateTime
+
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("assignments")
+}
+
+model Submission {
+  id String @id @default(uuid())
+
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id])
+
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+
+  textContent String?
+  fileUrl     String?
+
+  grade    Decimal? @db.Decimal(5, 2)
+  feedback String?
+  gradeAt  DateTime
+
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([assignmentId, studentId])
+  @@map("submissions")
+}
+
+model FinancialObligation {
+  id String @id @default(uuid())
+
+  studentId String
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+
+  type       ObligationType
+  descrption String
+  amount     Decimal          @db.Decimal(10, 2)
+  dueDate    DateTime
+  status     ObligationStatus @default(PENDING)
+
+  payments Payment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId, status, dueDate])
+  @@map("financial_obligations")
+}
+
+model Payment {
+  id String @id @default(uuid())
+
+  obligationId String
+  obligation   FinancialObligation @relation(fields: [obligationId], references: [id])
+
+  amount Decimal @db.Decimal(10, 2)
+
+  method PaymentMethod
+  status Paymentstatus @default(PENDING)
+
+  receiptNumber String? @unique
+
+  verifiedById String
+  verifyBy     User?  @relation("PaymentVerifier", fields: [verifiedById], references: [id])
+
+  verfiedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payments")
+}
