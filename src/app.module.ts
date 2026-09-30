@@ -7,6 +7,10 @@ import { envValidationSchema } from './config/env.validation.js';
 import { PrismaModule } from './database/prisma.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
+import { AcademicPeriodsModule } from './academic-periods/academic-periods.module.js';
+import { SubjectsModule } from './subjects/subjects.module.js';
+import { GroupsModule } from './groups/groups.module.js';
+import { ScheduleBlocksModule } from './schedule-blocks/schedule-blocks.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -19,6 +23,10 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PrismaModule,
     AuthModule,
     UsersModule,
+    AcademicPeriodsModule,
+    SubjectsModule,
+    GroupsModule,
+    ScheduleBlocksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

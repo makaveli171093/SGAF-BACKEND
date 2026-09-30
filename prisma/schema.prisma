@@ -194,7 +194,7 @@ model ScheduleBlock {
 
   dayOfWeek DayOfWeek
   startTime DateTime  @db.Time()
-  endtTime  DateTime  @db.Time()
+  endTime   DateTime  @db.Time()
 }
 
 model Enrollment {

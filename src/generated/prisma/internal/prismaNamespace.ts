@@ -1446,7 +1446,7 @@ export const ScheduleBlockScalarFieldEnum = {
   groupId: 'groupId',
   dayOfWeek: 'dayOfWeek',
   startTime: 'startTime',
-  endtTime: 'endtTime'
+  endTime: 'endTime'
 } as const
 
 export type ScheduleBlockScalarFieldEnum = (typeof ScheduleBlockScalarFieldEnum)[keyof typeof ScheduleBlockScalarFieldEnum]

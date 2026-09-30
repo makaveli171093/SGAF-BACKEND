@@ -29,7 +29,7 @@ export type ScheduleBlockMinAggregateOutputType = {
   groupId: string | null
   dayOfWeek: $Enums.DayOfWeek | null
   startTime: Date | null
-  endtTime: Date | null
+  endTime: Date | null
 }
 
 export type ScheduleBlockMaxAggregateOutputType = {
@@ -37,7 +37,7 @@ export type ScheduleBlockMaxAggregateOutputType = {
   groupId: string | null
   dayOfWeek: $Enums.DayOfWeek | null
   startTime: Date | null
-  endtTime: Date | null
+  endTime: Date | null
 }
 
 export type ScheduleBlockCountAggregateOutputType = {
@@ -45,7 +45,7 @@ export type ScheduleBlockCountAggregateOutputType = {
   groupId: number
   dayOfWeek: number
   startTime: number
-  endtTime: number
+  endTime: number
   _all: number
 }
 
@@ -55,7 +55,7 @@ export type ScheduleBlockMinAggregateInputType = {
   groupId?: true
   dayOfWeek?: true
   startTime?: true
-  endtTime?: true
+  endTime?: true
 }
 
 export type ScheduleBlockMaxAggregateInputType = {
@@ -63,7 +63,7 @@ export type ScheduleBlockMaxAggregateInputType = {
   groupId?: true
   dayOfWeek?: true
   startTime?: true
-  endtTime?: true
+  endTime?: true
 }
 
 export type ScheduleBlockCountAggregateInputType = {
@@ -71,7 +71,7 @@ export type ScheduleBlockCountAggregateInputType = {
   groupId?: true
   dayOfWeek?: true
   startTime?: true
-  endtTime?: true
+  endTime?: true
   _all?: true
 }
 
@@ -152,7 +152,7 @@ export type ScheduleBlockGroupByOutputType = {
   groupId: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date
-  endtTime: Date
+  endTime: Date
   _count: ScheduleBlockCountAggregateOutputType | null
   _min: ScheduleBlockMinAggregateOutputType | null
   _max: ScheduleBlockMaxAggregateOutputType | null
@@ -181,7 +181,7 @@ export type ScheduleBlockWhereInput = {
   groupId?: Prisma.StringFilter<"ScheduleBlock"> | string
   dayOfWeek?: Prisma.EnumDayOfWeekFilter<"ScheduleBlock"> | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
-  endtTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
+  endTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
   group?: Prisma.XOR<Prisma.GroupScalarRelationFilter, Prisma.GroupWhereInput>
 }
 
@@ -190,7 +190,7 @@ export type ScheduleBlockOrderByWithRelationInput = {
   groupId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
-  endtTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
   group?: Prisma.GroupOrderByWithRelationInput
 }
 
@@ -202,7 +202,7 @@ export type ScheduleBlockWhereUniqueInput = Prisma.AtLeast<{
   groupId?: Prisma.StringFilter<"ScheduleBlock"> | string
   dayOfWeek?: Prisma.EnumDayOfWeekFilter<"ScheduleBlock"> | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
-  endtTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
+  endTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
   group?: Prisma.XOR<Prisma.GroupScalarRelationFilter, Prisma.GroupWhereInput>
 }, "id">
 
@@ -211,7 +211,7 @@ export type ScheduleBlockOrderByWithAggregationInput = {
   groupId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
-  endtTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
   _count?: Prisma.ScheduleBlockCountOrderByAggregateInput
   _max?: Prisma.ScheduleBlockMaxOrderByAggregateInput
   _min?: Prisma.ScheduleBlockMinOrderByAggregateInput
@@ -225,14 +225,14 @@ export type ScheduleBlockScalarWhereWithAggregatesInput = {
   groupId?: Prisma.StringWithAggregatesFilter<"ScheduleBlock"> | string
   dayOfWeek?: Prisma.EnumDayOfWeekWithAggregatesFilter<"ScheduleBlock"> | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeWithAggregatesFilter<"ScheduleBlock"> | Date | string
-  endtTime?: Prisma.DateTimeWithAggregatesFilter<"ScheduleBlock"> | Date | string
+  endTime?: Prisma.DateTimeWithAggregatesFilter<"ScheduleBlock"> | Date | string
 }
 
 export type ScheduleBlockCreateInput = {
   id?: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
   group: Prisma.GroupCreateNestedOneWithoutScheduleBlocksInput
 }
 
@@ -241,14 +241,14 @@ export type ScheduleBlockUncheckedCreateInput = {
   groupId: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
 }
 
 export type ScheduleBlockUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   group?: Prisma.GroupUpdateOneRequiredWithoutScheduleBlocksNestedInput
 }
 
@@ -257,7 +257,7 @@ export type ScheduleBlockUncheckedUpdateInput = {
   groupId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScheduleBlockCreateManyInput = {
@@ -265,14 +265,14 @@ export type ScheduleBlockCreateManyInput = {
   groupId: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
 }
 
 export type ScheduleBlockUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScheduleBlockUncheckedUpdateManyInput = {
@@ -280,7 +280,7 @@ export type ScheduleBlockUncheckedUpdateManyInput = {
   groupId?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScheduleBlockListRelationFilter = {
@@ -298,7 +298,7 @@ export type ScheduleBlockCountOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
-  endtTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
 }
 
 export type ScheduleBlockMaxOrderByAggregateInput = {
@@ -306,7 +306,7 @@ export type ScheduleBlockMaxOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
-  endtTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
 }
 
 export type ScheduleBlockMinOrderByAggregateInput = {
@@ -314,7 +314,7 @@ export type ScheduleBlockMinOrderByAggregateInput = {
   groupId?: Prisma.SortOrder
   dayOfWeek?: Prisma.SortOrder
   startTime?: Prisma.SortOrder
-  endtTime?: Prisma.SortOrder
+  endTime?: Prisma.SortOrder
 }
 
 export type ScheduleBlockCreateNestedManyWithoutGroupInput = {
@@ -367,14 +367,14 @@ export type ScheduleBlockCreateWithoutGroupInput = {
   id?: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
 }
 
 export type ScheduleBlockUncheckedCreateWithoutGroupInput = {
   id?: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
 }
 
 export type ScheduleBlockCreateOrConnectWithoutGroupInput = {
@@ -411,35 +411,35 @@ export type ScheduleBlockScalarWhereInput = {
   groupId?: Prisma.StringFilter<"ScheduleBlock"> | string
   dayOfWeek?: Prisma.EnumDayOfWeekFilter<"ScheduleBlock"> | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
-  endtTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
+  endTime?: Prisma.DateTimeFilter<"ScheduleBlock"> | Date | string
 }
 
 export type ScheduleBlockCreateManyGroupInput = {
   id?: string
   dayOfWeek: $Enums.DayOfWeek
   startTime: Date | string
-  endtTime: Date | string
+  endTime: Date | string
 }
 
 export type ScheduleBlockUpdateWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScheduleBlockUncheckedUpdateWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type ScheduleBlockUncheckedUpdateManyWithoutGroupInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   dayOfWeek?: Prisma.EnumDayOfWeekFieldUpdateOperationsInput | $Enums.DayOfWeek
   startTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  endtTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -449,7 +449,7 @@ export type ScheduleBlockSelect<ExtArgs extends runtime.Types.Extensions.Interna
   groupId?: boolean
   dayOfWeek?: boolean
   startTime?: boolean
-  endtTime?: boolean
+  endTime?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleBlock"]>
 
@@ -458,7 +458,7 @@ export type ScheduleBlockSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   groupId?: boolean
   dayOfWeek?: boolean
   startTime?: boolean
-  endtTime?: boolean
+  endTime?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleBlock"]>
 
@@ -467,7 +467,7 @@ export type ScheduleBlockSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   groupId?: boolean
   dayOfWeek?: boolean
   startTime?: boolean
-  endtTime?: boolean
+  endTime?: boolean
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["scheduleBlock"]>
 
@@ -476,10 +476,10 @@ export type ScheduleBlockSelectScalar = {
   groupId?: boolean
   dayOfWeek?: boolean
   startTime?: boolean
-  endtTime?: boolean
+  endTime?: boolean
 }
 
-export type ScheduleBlockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "groupId" | "dayOfWeek" | "startTime" | "endtTime", ExtArgs["result"]["scheduleBlock"]>
+export type ScheduleBlockOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "groupId" | "dayOfWeek" | "startTime" | "endTime", ExtArgs["result"]["scheduleBlock"]>
 export type ScheduleBlockInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   group?: boolean | Prisma.GroupDefaultArgs<ExtArgs>
 }
@@ -500,7 +500,7 @@ export type $ScheduleBlockPayload<ExtArgs extends runtime.Types.Extensions.Inter
     groupId: string
     dayOfWeek: $Enums.DayOfWeek
     startTime: Date
-    endtTime: Date
+    endTime: Date
   }, ExtArgs["result"]["scheduleBlock"]>
   composites: {}
 }
@@ -929,7 +929,7 @@ export interface ScheduleBlockFieldRefs {
   readonly groupId: Prisma.FieldRef<"ScheduleBlock", 'String'>
   readonly dayOfWeek: Prisma.FieldRef<"ScheduleBlock", 'DayOfWeek'>
   readonly startTime: Prisma.FieldRef<"ScheduleBlock", 'DateTime'>
-  readonly endtTime: Prisma.FieldRef<"ScheduleBlock", 'DateTime'>
+  readonly endTime: Prisma.FieldRef<"ScheduleBlock", 'DateTime'>
 }
     
 
