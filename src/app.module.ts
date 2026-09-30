@@ -11,6 +11,7 @@ import { AcademicPeriodsModule } from './academic-periods/academic-periods.modul
 import { SubjectsModule } from './subjects/subjects.module.js';
 import { GroupsModule } from './groups/groups.module.js';
 import { ScheduleBlocksModule } from './schedule-blocks/schedule-blocks.module.js';
+import { EnrollmentsModule } from './enrollments/enrollments.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -27,6 +28,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     SubjectsModule,
     GroupsModule,
     ScheduleBlocksModule,
+    EnrollmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
