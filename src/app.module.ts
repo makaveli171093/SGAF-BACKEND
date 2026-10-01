@@ -12,6 +12,8 @@ import { SubjectsModule } from './subjects/subjects.module.js';
 import { GroupsModule } from './groups/groups.module.js';
 import { ScheduleBlocksModule } from './schedule-blocks/schedule-blocks.module.js';
 import { EnrollmentsModule } from './enrollments/enrollments.module.js';
+import { AssignmentsModule } from './assignments/assignments.module.js';
+import { SubmissionsModule } from './submissions/submissions.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -29,6 +31,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     GroupsModule,
     ScheduleBlocksModule,
     EnrollmentsModule,
+    AssignmentsModule,
+    SubmissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

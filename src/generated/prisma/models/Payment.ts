@@ -565,10 +565,6 @@ export type EnumPaymentstatusFieldUpdateOperationsInput = {
   set?: $Enums.Paymentstatus
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type PaymentCreateWithoutVerifyByInput = {
   id?: string
   amount: runtime.Decimal | runtime.DecimalJsLike | number | string

@@ -42,7 +42,7 @@ export type SubmissionMinAggregateOutputType = {
   fileUrl: string | null
   grade: runtime.Decimal | null
   feedback: string | null
-  gradeAt: Date | null
+  gradedAt: Date | null
   submittedAt: Date | null
   updatedAt: Date | null
 }
@@ -55,7 +55,7 @@ export type SubmissionMaxAggregateOutputType = {
   fileUrl: string | null
   grade: runtime.Decimal | null
   feedback: string | null
-  gradeAt: Date | null
+  gradedAt: Date | null
   submittedAt: Date | null
   updatedAt: Date | null
 }
@@ -68,7 +68,7 @@ export type SubmissionCountAggregateOutputType = {
   fileUrl: number
   grade: number
   feedback: number
-  gradeAt: number
+  gradedAt: number
   submittedAt: number
   updatedAt: number
   _all: number
@@ -91,7 +91,7 @@ export type SubmissionMinAggregateInputType = {
   fileUrl?: true
   grade?: true
   feedback?: true
-  gradeAt?: true
+  gradedAt?: true
   submittedAt?: true
   updatedAt?: true
 }
@@ -104,7 +104,7 @@ export type SubmissionMaxAggregateInputType = {
   fileUrl?: true
   grade?: true
   feedback?: true
-  gradeAt?: true
+  gradedAt?: true
   submittedAt?: true
   updatedAt?: true
 }
@@ -117,7 +117,7 @@ export type SubmissionCountAggregateInputType = {
   fileUrl?: true
   grade?: true
   feedback?: true
-  gradeAt?: true
+  gradedAt?: true
   submittedAt?: true
   updatedAt?: true
   _all?: true
@@ -217,7 +217,7 @@ export type SubmissionGroupByOutputType = {
   fileUrl: string | null
   grade: runtime.Decimal | null
   feedback: string | null
-  gradeAt: Date
+  gradedAt: Date | null
   submittedAt: Date
   updatedAt: Date
   _count: SubmissionCountAggregateOutputType | null
@@ -253,7 +253,7 @@ export type SubmissionWhereInput = {
   fileUrl?: Prisma.StringNullableFilter<"Submission"> | string | null
   grade?: Prisma.DecimalNullableFilter<"Submission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.StringNullableFilter<"Submission"> | string | null
-  gradeAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
+  gradedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   submittedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   assignment?: Prisma.XOR<Prisma.AssignmentScalarRelationFilter, Prisma.AssignmentWhereInput>
@@ -268,7 +268,7 @@ export type SubmissionOrderByWithRelationInput = {
   fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   feedback?: Prisma.SortOrderInput | Prisma.SortOrder
-  gradeAt?: Prisma.SortOrder
+  gradedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   assignment?: Prisma.AssignmentOrderByWithRelationInput
@@ -287,7 +287,7 @@ export type SubmissionWhereUniqueInput = Prisma.AtLeast<{
   fileUrl?: Prisma.StringNullableFilter<"Submission"> | string | null
   grade?: Prisma.DecimalNullableFilter<"Submission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.StringNullableFilter<"Submission"> | string | null
-  gradeAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
+  gradedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   submittedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   assignment?: Prisma.XOR<Prisma.AssignmentScalarRelationFilter, Prisma.AssignmentWhereInput>
@@ -302,7 +302,7 @@ export type SubmissionOrderByWithAggregationInput = {
   fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   feedback?: Prisma.SortOrderInput | Prisma.SortOrder
-  gradeAt?: Prisma.SortOrder
+  gradedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.SubmissionCountOrderByAggregateInput
@@ -323,7 +323,7 @@ export type SubmissionScalarWhereWithAggregatesInput = {
   fileUrl?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
   grade?: Prisma.DecimalNullableWithAggregatesFilter<"Submission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.StringNullableWithAggregatesFilter<"Submission"> | string | null
-  gradeAt?: Prisma.DateTimeWithAggregatesFilter<"Submission"> | Date | string
+  gradedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Submission"> | Date | string | null
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Submission"> | Date | string
 }
@@ -334,7 +334,7 @@ export type SubmissionCreateInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
   assignment: Prisma.AssignmentCreateNestedOneWithoutSubmissionsInput
@@ -349,7 +349,7 @@ export type SubmissionUncheckedCreateInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -360,7 +360,7 @@ export type SubmissionUpdateInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignment?: Prisma.AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -375,7 +375,7 @@ export type SubmissionUncheckedUpdateInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -388,7 +388,7 @@ export type SubmissionCreateManyInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -399,7 +399,7 @@ export type SubmissionUpdateManyMutationInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -412,7 +412,7 @@ export type SubmissionUncheckedUpdateManyInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -440,7 +440,7 @@ export type SubmissionCountOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   feedback?: Prisma.SortOrder
-  gradeAt?: Prisma.SortOrder
+  gradedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -457,7 +457,7 @@ export type SubmissionMaxOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   feedback?: Prisma.SortOrder
-  gradeAt?: Prisma.SortOrder
+  gradedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -470,7 +470,7 @@ export type SubmissionMinOrderByAggregateInput = {
   fileUrl?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   feedback?: Prisma.SortOrder
-  gradeAt?: Prisma.SortOrder
+  gradedAt?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -571,13 +571,17 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
 export type SubmissionCreateWithoutStudentInput = {
   id?: string
   textContent?: string | null
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
   assignment: Prisma.AssignmentCreateNestedOneWithoutSubmissionsInput
@@ -590,7 +594,7 @@ export type SubmissionUncheckedCreateWithoutStudentInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -632,7 +636,7 @@ export type SubmissionScalarWhereInput = {
   fileUrl?: Prisma.StringNullableFilter<"Submission"> | string | null
   grade?: Prisma.DecimalNullableFilter<"Submission"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.StringNullableFilter<"Submission"> | string | null
-  gradeAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
+  gradedAt?: Prisma.DateTimeNullableFilter<"Submission"> | Date | string | null
   submittedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Submission"> | Date | string
 }
@@ -643,7 +647,7 @@ export type SubmissionCreateWithoutAssignmentInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
   student: Prisma.StudentProfileCreateNestedOneWithoutSubmissionsInput
@@ -656,7 +660,7 @@ export type SubmissionUncheckedCreateWithoutAssignmentInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -694,7 +698,7 @@ export type SubmissionCreateManyStudentInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -705,7 +709,7 @@ export type SubmissionUpdateWithoutStudentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignment?: Prisma.AssignmentUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -718,7 +722,7 @@ export type SubmissionUncheckedUpdateWithoutStudentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -730,7 +734,7 @@ export type SubmissionUncheckedUpdateManyWithoutStudentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -742,7 +746,7 @@ export type SubmissionCreateManyAssignmentInput = {
   fileUrl?: string | null
   grade?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: string | null
-  gradeAt: Date | string
+  gradedAt?: Date | string | null
   submittedAt?: Date | string
   updatedAt?: Date | string
 }
@@ -753,7 +757,7 @@ export type SubmissionUpdateWithoutAssignmentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   student?: Prisma.StudentProfileUpdateOneRequiredWithoutSubmissionsNestedInput
@@ -766,7 +770,7 @@ export type SubmissionUncheckedUpdateWithoutAssignmentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -778,7 +782,7 @@ export type SubmissionUncheckedUpdateManyWithoutAssignmentInput = {
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   feedback?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  gradeAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  gradedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -793,7 +797,7 @@ export type SubmissionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   fileUrl?: boolean
   grade?: boolean
   feedback?: boolean
-  gradeAt?: boolean
+  gradedAt?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
@@ -808,7 +812,7 @@ export type SubmissionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   fileUrl?: boolean
   grade?: boolean
   feedback?: boolean
-  gradeAt?: boolean
+  gradedAt?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
@@ -823,7 +827,7 @@ export type SubmissionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   fileUrl?: boolean
   grade?: boolean
   feedback?: boolean
-  gradeAt?: boolean
+  gradedAt?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
@@ -838,12 +842,12 @@ export type SubmissionSelectScalar = {
   fileUrl?: boolean
   grade?: boolean
   feedback?: boolean
-  gradeAt?: boolean
+  gradedAt?: boolean
   submittedAt?: boolean
   updatedAt?: boolean
 }
 
-export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assignmentId" | "studentId" | "textContent" | "fileUrl" | "grade" | "feedback" | "gradeAt" | "submittedAt" | "updatedAt", ExtArgs["result"]["submission"]>
+export type SubmissionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assignmentId" | "studentId" | "textContent" | "fileUrl" | "grade" | "feedback" | "gradedAt" | "submittedAt" | "updatedAt", ExtArgs["result"]["submission"]>
 export type SubmissionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assignment?: boolean | Prisma.AssignmentDefaultArgs<ExtArgs>
   student?: boolean | Prisma.StudentProfileDefaultArgs<ExtArgs>
@@ -871,7 +875,7 @@ export type $SubmissionPayload<ExtArgs extends runtime.Types.Extensions.Internal
     fileUrl: string | null
     grade: runtime.Decimal | null
     feedback: string | null
-    gradeAt: Date
+    gradedAt: Date | null
     submittedAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["submission"]>
@@ -1306,7 +1310,7 @@ export interface SubmissionFieldRefs {
   readonly fileUrl: Prisma.FieldRef<"Submission", 'String'>
   readonly grade: Prisma.FieldRef<"Submission", 'Decimal'>
   readonly feedback: Prisma.FieldRef<"Submission", 'String'>
-  readonly gradeAt: Prisma.FieldRef<"Submission", 'DateTime'>
+  readonly gradedAt: Prisma.FieldRef<"Submission", 'DateTime'>
   readonly submittedAt: Prisma.FieldRef<"Submission", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Submission", 'DateTime'>
 }

@@ -243,9 +243,9 @@ model Submission {
   textContent String?
   fileUrl     String?
 
-  grade    Decimal? @db.Decimal(5, 2)
+  grade    Decimal?  @db.Decimal(5, 2)
   feedback String?
-  gradeAt  DateTime
+  gradedAt DateTime?
 
   submittedAt DateTime @default(now())
   updatedAt   DateTime @updatedAt

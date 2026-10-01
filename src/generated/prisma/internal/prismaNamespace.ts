@@ -1484,7 +1484,7 @@ export const SubmissionScalarFieldEnum = {
   fileUrl: 'fileUrl',
   grade: 'grade',
   feedback: 'feedback',
-  gradeAt: 'gradeAt',
+  gradedAt: 'gradedAt',
   submittedAt: 'submittedAt',
   updatedAt: 'updatedAt'
 } as const
