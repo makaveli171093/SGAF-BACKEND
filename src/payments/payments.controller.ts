@@ -7,6 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard.js';
 
 import { CreateOnlinePaymentDto } from './dto/create-online-payment.dto.js';
 import { PaymentsService } from './payments.service.js';
+import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -22,5 +23,10 @@ export class PaymentsController {
     @Req() req: { user: { id: string } },
   ) {
     return this.paymentsService.createOnlinePayment(req.user.id, dto);
+  }
+
+  @Post('webhook')
+  handleWebhook(@Body() dto: MockPayWebhookDto) {
+    return this.paymentsService.handleMockPayWebhook(dto);
   }
 }

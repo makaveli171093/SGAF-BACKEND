@@ -7,10 +7,15 @@ interface CreateMockPayPaymentInput {
   metadata: Record<string, string>;
 }
 
+interface MockPayApiResponse {
+  id_transaccion: string;
+  checkout_url: string;
+  [key: string]: unknown;
+}
+
 interface MockPayPaymentResponse {
   id: string;
   checkout_url: string;
-  [key: string]: unknown;
 }
 
 @Injectable()
@@ -19,11 +24,13 @@ export class MockPayService {
   async createPayment(
     input: CreateMockPayPaymentInput,
   ): Promise<MockPayPaymentResponse> {
-    const apiUrl = this.configService.getOrThrow<string>('MOCKPAY_API_URL');
+    const baseUrl = this.configService
+      .getOrThrow<string>('MOCKPAY_API_URL')
+      .replace(/\/+$/, '');
     const secretKey =
       this.configService.getOrThrow<string>('MOCKPAY_SECRET_KEY');
 
-    const response = await fetch(`${apiUrl}/api/v1/payments`, {
+    const response = await fetch(`${baseUrl}/api/v1/payments`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${secretKey}`,
@@ -31,9 +38,24 @@ export class MockPayService {
       },
       body: JSON.stringify(input),
     });
+
+    const responseText = await response.text();
+
     if (!response.ok) {
       throw new BadGatewayException('No se pudo comunicar con MockPay');
     }
-    return response.json() as Promise<MockPayPaymentResponse>;
+
+    const data = JSON.parse(responseText) as MockPayApiResponse;
+
+    if (!data.id_transaccion || !data.checkout_url) {
+      throw new BadGatewayException(
+        'La respuesta de MockPay no contiene id_transaccion o checkout_url',
+      );
+    }
+
+    return {
+      id: data.id_transaccion,
+      checkout_url: data.checkout_url,
+    };
   }
 }

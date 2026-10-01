@@ -15,12 +15,15 @@ import {
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateOnlinePaymentDto } from './dto/create-online-payment.dto.js';
 import { MockPayService } from './mockpay.service.js';
+import { ConfigService } from '@nestjs/config';
+import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly mockPayService: MockPayService,
+    private readonly configService: ConfigService,
   ) {}
   async createOnlinePayment(userId: string, dto: CreateOnlinePaymentDto) {
     const obligation = await this.prisma.financialObligation.findUnique({
@@ -54,7 +57,7 @@ export class PaymentsService {
 
     if (obligation.status === ObligationStatus.CACELLED) {
       throw new ConflictException(
-        'Esta obligación financiera ya ha sido cancelada',
+        'Esta obligación financiera ha sido cancelada',
       );
     }
 
@@ -76,7 +79,7 @@ export class PaymentsService {
 
     const mockPayResponse = await this.mockPayService.createPayment({
       amount,
-      currency: 'USD',
+      currency: this.configService.get<string>('MOCKPAY_CURRENCY', 'USD'),
       metadata: {
         obligationId: dto.obligationId,
         studentId: obligation.studentId,
@@ -108,6 +111,108 @@ export class PaymentsService {
         externalReference: payment.externalReference,
       },
       checkoutUrl: mockPayResponse.checkout_url,
+    };
+  }
+
+  async handleMockPayWebhook(dto: MockPayWebhookDto) {
+    const payment = await this.prisma.payment.findUnique({
+      where: {
+        externalReference: dto.id,
+      },
+      include: {
+        obligation: true,
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundException(
+        'No existe un pago asociado a la transacción recibida',
+      );
+    }
+    if (
+      dto.metadata?.obligation_id &&
+      dto.metadata.obligation_id !== payment.obligationId
+    ) {
+      throw new BadRequestException(
+        'La obligación informada por MockPay no coincide con el pago registrado',
+      );
+    }
+
+    const paymentAmount = Number(payment.amount.toString());
+
+    if (paymentAmount !== dto.amount) {
+      throw new BadRequestException(
+        'El monto informado por MockPay no coincide con el pago registrado',
+      );
+    }
+
+    if (
+      payment.status === PaymentStatus.APPROVED ||
+      payment.status === PaymentStatus.REJECTED
+    ) {
+      return {
+        message: 'Webhook ya procesado anteriormente',
+        paymentId: payment.id,
+        status: payment.status,
+      };
+    }
+    const gatewayResponse = {
+      event: dto.event,
+      id: dto.id,
+      amount: dto.amount,
+      currency: dto.currency,
+      status: dto.status,
+      failure_reason: dto.failure_reason ?? null,
+      metadata: dto.metadata,
+      created_at: dto.created_at,
+    };
+
+    if (dto.status === 'SUCCEEDED') {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const updatedPayment = await tx.payment.update({
+          where: {
+            id: payment.id,
+          },
+          data: {
+            status: PaymentStatus.APPROVED,
+            gatewayResponse,
+          },
+        });
+
+        const updatedObligation = await tx.financialObligation.update({
+          where: {
+            id: payment.obligationId,
+          },
+          data: {
+            status: ObligationStatus.PAID,
+          },
+        });
+
+        return {
+          updatedPayment,
+          updatedObligation,
+        };
+      });
+
+      return {
+        message: 'Pago aprobado correctamente',
+        payment: result.updatedPayment,
+        obligation: result.updatedObligation,
+      };
+    }
+    const rejectedPayment = await this.prisma.payment.update({
+      where: {
+        id: payment.id,
+      },
+      data: {
+        status: PaymentStatus.REJECTED,
+        gatewayResponse,
+      },
+    });
+
+    return {
+      message: 'Pago rechazado por MockPay',
+      payment: rejectedPayment,
     };
   }
 }
