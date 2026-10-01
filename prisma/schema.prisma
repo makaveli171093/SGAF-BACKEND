@@ -1,4 +1,4 @@
-generator client {
+ generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
 }
@@ -60,7 +60,7 @@ enum PaymentMethod {
   ONLINE
 }
 
-enum Paymentstatus {
+enum PaymentStatus {
   PENDING
   APPROVED
   REJECTED
@@ -284,14 +284,17 @@ model Payment {
   amount Decimal @db.Decimal(10, 2)
 
   method PaymentMethod
-  status Paymentstatus @default(PENDING)
+  status PaymentStatus @default(PENDING)
 
   receiptNumber String? @unique
 
-  verifiedById String
+  verifiedById String?
   verifyBy     User?  @relation("PaymentVerifier", fields: [verifiedById], references: [id])
 
   verfiedAt DateTime?
+
+  externalReference String? @unique
+  gatewayResponse   Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

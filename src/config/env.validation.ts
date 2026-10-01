@@ -12,4 +12,10 @@ export const envValidationSchema = Joi.object({
   JWT_SECRET: Joi.string().min(16).required(),
 
   JWT_EXPIRES_IN: Joi.string().default('1d'),
+
+  MOCKPAY_API_URL: Joi.string().uri().required(),
+
+  MOCKPAY_SECRET_KEY: Joi.string().required(),
+
+  MOCKPAY_CURRENCY: Joi.string().length(3).default('USD'),
 });

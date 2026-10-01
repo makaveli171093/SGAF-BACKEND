@@ -14,6 +14,7 @@ import { ScheduleBlocksModule } from './schedule-blocks/schedule-blocks.module.j
 import { EnrollmentsModule } from './enrollments/enrollments.module.js';
 import { AssignmentsModule } from './assignments/assignments.module.js';
 import { SubmissionsModule } from './submissions/submissions.module.js';
+import { PaymentsModule } from './payments/payments.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -33,6 +34,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     EnrollmentsModule,
     AssignmentsModule,
     SubmissionsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

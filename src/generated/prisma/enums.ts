@@ -86,10 +86,10 @@ export const PaymentMethod = {
 export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod]
 
 
-export const Paymentstatus = {
+export const PaymentStatus = {
   PENDING: 'PENDING',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED'
 } as const
 
-export type Paymentstatus = (typeof Paymentstatus)[keyof typeof Paymentstatus]
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus]
