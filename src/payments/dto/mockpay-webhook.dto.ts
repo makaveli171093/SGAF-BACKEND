@@ -59,4 +59,29 @@ export class MockPayWebhookDto {
   })
   @IsString()
   created_at: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  card_brand?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  last4?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  customer_phone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  customer_address?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  customer_zip?: string;
 }
