@@ -18,6 +18,7 @@ import { PaymentsService } from './payments.service.js';
 import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
 import { CreateManualPaymentDto } from './dto/create-manual-payment.dto.js';
 import { VerifyManualPaymentDto } from './dto/verify-manual-payment.dto.js';
+import { CreateApplicantOnlinePaymentDto } from './dto/create-applicant-online-payment.dto.js';
 
 @ApiTags('Payments')
 @ApiBearerAuth()
@@ -60,5 +61,10 @@ export class PaymentsController {
       req.user.id,
       dto,
     );
+  }
+
+  @Post('applicant/online')
+  createApplicantOnlinePayment(@Body() dto: CreateApplicantOnlinePaymentDto) {
+    return this.paymentsService.createApplicantOnlinePayment(dto);
   }
 }

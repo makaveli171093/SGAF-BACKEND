@@ -8,6 +8,7 @@ import {
 
 import {
   ObligationStatus,
+  ObligationType,
   PaymentMethod,
   PaymentStatus,
   UserStatus,
@@ -20,6 +21,7 @@ import { ConfigService } from '@nestjs/config';
 import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
 import { CreateManualPaymentDto } from './dto/create-manual-payment.dto.js';
 import { VerifyManualPaymentDto } from './dto/verify-manual-payment.dto.js';
+import { CreateApplicantOnlinePaymentDto } from './dto/create-applicant-online-payment.dto.js';
 
 @Injectable()
 export class PaymentsService {
@@ -413,6 +415,104 @@ export class PaymentsService {
     return {
       SUSPEND: false,
       status: UserStatus.ACTIVE,
+    };
+  }
+
+  async createApplicantOnlinePayment(dto: CreateApplicantOnlinePaymentDto) {
+    const obligation = await this.prisma.financialObligation.findUnique({
+      where: {
+        id: dto.obligationId,
+      },
+      include: {
+        student: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!obligation) {
+      throw new NotFoundException('La obligación financiera no existe');
+    }
+
+    if (obligation.student.enrollmentCode !== dto.enrollmentCode) {
+      throw new ForbiddenException(
+        'El código de matrícula no corresponde a esta obligación',
+      );
+    }
+
+    if (obligation.student.user.status !== UserStatus.PENDING_APPROVAL) {
+      throw new BadRequestException(
+        'Este usuario ya no se encuentra pendiente de aprobación',
+      );
+    }
+
+    if (obligation.type !== ObligationType.ENROLLMENT) {
+      throw new BadRequestException(
+        'Solo se puede pagar la obligación inicial de matrícula por este medio',
+      );
+    }
+
+    if (
+      obligation.status === ObligationStatus.PAID ||
+      obligation.status === ObligationStatus.CACELLED
+    ) {
+      throw new BadRequestException(
+        'La obligación no puede recibir nuevos pagos',
+      );
+    }
+
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: {
+        obligationId: obligation.id,
+        method: PaymentMethod.ONLINE,
+        status: PaymentStatus.PENDING,
+      },
+    });
+
+    if (existingPayment) {
+      throw new ConflictException(
+        'Ya existe una intención de pago pendiente para esta obligación',
+      );
+    }
+
+    const amount = Number(obligation.amount.toString());
+
+    const currency = this.configService.get<string>('MOCKPAY_CURRENCY', 'USD');
+
+    const mockPayPayment = await this.mockPayService.createPayment({
+      amount,
+      currency,
+      metadata: {
+        obligation_id: obligation.id,
+        student_id: obligation.studentId,
+      },
+    });
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        obligationId: obligation.id,
+        amount: obligation.amount,
+        method: PaymentMethod.ONLINE,
+        status: PaymentStatus.PENDING,
+        externalReference: mockPayPayment.id,
+        gatewayResponse: {
+          id: mockPayPayment.id,
+          checkout_url: mockPayPayment.checkout_url,
+        },
+      },
+    });
+
+    return {
+      message: 'Intención de pago de matrícula creada correctamente',
+      payment: {
+        id: payment.id,
+        status: payment.status,
+        amount: payment.amount,
+        externalReference: payment.externalReference,
+      },
+      checkoutUrl: mockPayPayment.checkout_url,
     };
   }
 }

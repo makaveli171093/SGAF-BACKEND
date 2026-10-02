@@ -11,6 +11,10 @@ import crypto from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto.js';
+import {
+  ObligationStatus,
+  ObligationType,
+} from '../generated/prisma/browser.js';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +40,8 @@ export class AuthService {
 
     const enrollmentCode = this.generateEnrollmentCode();
     const enrollmentAmount = 200;
+    const dueDate = new Date();
+    dueDate.setMonth(dueDate.getMonth() + 1);
 
     const student = await this.prisma.$transaction(async (tx) => {
       const user = await tx.user.create({
@@ -61,19 +67,21 @@ export class AuthService {
         },
       });
 
-      await tx.financialObligation.create({
+      const obligation = await tx.financialObligation.create({
         data: {
           studentId: studentProfile.id,
-          type: 'ENROLLMENT',
-          description: 'Matrícula inicial',
+          type: ObligationType.ENROLLMENT,
+          description: 'Pago de matrícula Inicial',
           amount: enrollmentAmount,
-          dueDate: new Date(),
-          status: 'PENDING',
+          dueDate,
+          status: ObligationStatus.PENDING,
         },
       });
+
       return {
         user,
         studentProfile,
+        obligation,
       };
     });
 
@@ -87,6 +95,12 @@ export class AuthService {
         role: student.user.role,
         status: student.user.status,
         enrollmentCode: student.studentProfile.enrollmentCode,
+      },
+      enrollmentObligation: {
+        id: student.obligation.id,
+        amount: student.obligation.amount,
+        status: student.obligation.status,
+        dueDate: student.obligation.dueDate,
       },
     };
   }
