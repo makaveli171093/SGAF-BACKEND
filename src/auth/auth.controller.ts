@@ -24,6 +24,7 @@ export class AuthController {
   }
 
   @Get('admin-test')
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   adminTest(@Req() req: any) {
