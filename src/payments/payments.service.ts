@@ -10,6 +10,7 @@ import {
   ObligationStatus,
   PaymentMethod,
   PaymentStatus,
+  UserStatus,
 } from '../generated/prisma/enums.js';
 
 import { PrismaService } from '../database/prisma.service.js';
@@ -17,6 +18,8 @@ import { CreateOnlinePaymentDto } from './dto/create-online-payment.dto.js';
 import { MockPayService } from './mockpay.service.js';
 import { ConfigService } from '@nestjs/config';
 import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
+import { CreateManualPaymentDto } from './dto/create-manual-payment.dto.js';
+import { VerifyManualPaymentDto } from './dto/verify-manual-payment.dto.js';
 
 @Injectable()
 export class PaymentsService {
@@ -200,6 +203,7 @@ export class PaymentsService {
         obligation: result.updatedObligation,
       };
     }
+    await this.syncStudentDebtStatus(payment.obligation.studentId);
     const rejectedPayment = await this.prisma.payment.update({
       where: {
         id: payment.id,
@@ -213,6 +217,202 @@ export class PaymentsService {
     return {
       message: 'Pago rechazado por MockPay',
       payment: rejectedPayment,
+    };
+  }
+
+  async createManualPayment(dto: CreateManualPaymentDto) {
+    const obligation = await this.prisma.financialObligation.findUnique({
+      where: {
+        id: dto.obligationId,
+      },
+    });
+
+    if (!obligation) {
+      throw new NotFoundException('La obligación financiera no existe');
+    }
+
+    if (
+      obligation.status === ObligationStatus.PAID ||
+      obligation.status === ObligationStatus.CACELLED
+    ) {
+      throw new BadRequestException(
+        'La obligación no puede recibir nuevos pagos',
+      );
+    }
+
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: {
+        obligationId: obligation.id,
+        status: PaymentStatus.PENDING,
+      },
+    });
+
+    if (existingPayment) {
+      throw new ConflictException(
+        'Ya existe un pago pendiente para esta obligación',
+      );
+    }
+
+    const payment = await this.prisma.payment.create({
+      data: {
+        obligationId: obligation.id,
+        amount: obligation.amount,
+        method: dto.method,
+        status: PaymentStatus.PENDING,
+      },
+    });
+
+    return {
+      message: 'Pago manual registrado correctamente',
+      payment,
+    };
+  }
+
+  async verifyManualPayment(
+    paymentId: string,
+    verifierUserId: string,
+    dto: VerifyManualPaymentDto,
+  ) {
+    const payment = await this.prisma.payment.findUnique({
+      where: {
+        id: paymentId,
+      },
+      include: {
+        obligation: true,
+      },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('El pago no existe');
+    }
+
+    if (payment.method === PaymentMethod.ONLINE) {
+      throw new BadRequestException(
+        'Los pagos online son verificados automáticamente por MockPay',
+      );
+    }
+
+    if (payment.status !== PaymentStatus.PENDING) {
+      throw new ConflictException('Este pago ya fue verificado anteriormente');
+    }
+
+    if (dto.status === PaymentStatus.APPROVED) {
+      const result = await this.prisma.$transaction(async (tx) => {
+        const updatedPayment = await tx.payment.update({
+          where: {
+            id: payment.id,
+          },
+          data: {
+            status: PaymentStatus.APPROVED,
+            verifyBy: {
+              connect: {
+                id: verifierUserId,
+              },
+            },
+            verfiedAt: new Date(),
+          },
+        });
+
+        const updatedObligation = await tx.financialObligation.update({
+          where: {
+            id: payment.obligationId,
+          },
+          data: {
+            status: ObligationStatus.PAID,
+          },
+        });
+
+        return {
+          updatedPayment,
+          updatedObligation,
+        };
+      });
+      await this.syncStudentDebtStatus(payment.obligation.studentId);
+
+      return {
+        message: 'Pago manual aprobado correctamente',
+        payment: result.updatedPayment,
+        obligation: result.updatedObligation,
+      };
+    }
+
+    const rejectedPayment = await this.prisma.payment.update({
+      where: {
+        id: payment.id,
+      },
+      data: {
+        status: PaymentStatus.REJECTED,
+        verifyBy: {
+          connect: {
+            id: verifierUserId,
+          },
+        },
+        verfiedAt: new Date(),
+      },
+    });
+
+    return {
+      message: 'Pago manual rechazado correctamente',
+      payment: rejectedPayment,
+    };
+  }
+
+  async syncStudentDebtStatus(studentId: string) {
+    const student = await this.prisma.studentProfile.findUnique({
+      where: {
+        id: studentId,
+      },
+      include: {
+        user: true,
+        financialObligations: true,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException('El estudiante no existe');
+    }
+
+    const now = new Date();
+
+    const hasOverdueDebt = student.financialObligations.some(
+      (obligation) =>
+        obligation.status !== ObligationStatus.PAID &&
+        obligation.status !== ObligationStatus.CACELLED &&
+        obligation.dueDate < now,
+    );
+
+    if (hasOverdueDebt) {
+      if (student.user.status !== UserStatus.SUSPEND_FOR_DEBT) {
+        await this.prisma.user.update({
+          where: {
+            id: student.userId,
+          },
+          data: {
+            status: UserStatus.SUSPEND_FOR_DEBT,
+          },
+        });
+      }
+
+      return {
+        SUSPEND: true,
+        status: UserStatus.SUSPEND_FOR_DEBT,
+      };
+    }
+
+    if (student.user.status === UserStatus.SUSPEND_FOR_DEBT) {
+      await this.prisma.user.update({
+        where: {
+          id: student.userId,
+        },
+        data: {
+          status: UserStatus.ACTIVE,
+        },
+      });
+    }
+
+    return {
+      SUSPEND: false,
+      status: UserStatus.ACTIVE,
     };
   }
 }

@@ -2,9 +2,15 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { Role } from '../generated/prisma/enums.js';
+import {
+  Role,
+  ObligationStatus,
+  ObligationType,
+  UserStatus,
+} from '../generated/prisma/enums.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateStaffUserDto } from './dto/create-staff-user.dto.js';
 
@@ -90,6 +96,69 @@ export class UsersService {
             }
           : null,
       },
+    };
+  }
+
+  async approveStudentApplicant(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      include: {
+        stundentProfile: {
+          include: {
+            financialObligations: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('El usuario no existe');
+    }
+
+    if (user.role !== Role.STUDENT) {
+      throw new BadRequestException(
+        'Solo se pueden aprobar postulantes estudiantes',
+      );
+    }
+
+    if (user.status !== UserStatus.PENDING_APPROVAL) {
+      throw new ConflictException(
+        'El postulante ya fue procesado anteriormente',
+      );
+    }
+
+    if (!user.stundentProfile) {
+      throw new BadRequestException('El usuario no tiene perfil de estudiante');
+    }
+
+    const enrollmentObligation = user.stundentProfile.financialObligations.find(
+      (obligation) => obligation.type === ObligationType.ENROLLMENT,
+    );
+
+    if (!enrollmentObligation) {
+      throw new BadRequestException(
+        'El estudiante no tiene una obligación de matrícula registrada',
+      );
+    }
+
+    if (enrollmentObligation.status !== ObligationStatus.PAID) {
+      throw new BadRequestException('La matrícula todavía no fue pagada');
+    }
+
+    const approvedUser = await this.prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        status: UserStatus.ACTIVE,
+      },
+    });
+
+    return {
+      message: 'Postulante aprobado correctamente',
+      user: approvedUser,
     };
   }
 }

@@ -6,5 +6,6 @@ import { MockPayService } from './mockpay.service.js';
 @Module({
   controllers: [PaymentsController],
   providers: [PaymentsService, MockPayService],
+  exports: [PaymentsService],
 })
 export class PaymentsModule {}

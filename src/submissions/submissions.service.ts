@@ -8,10 +8,14 @@ import {
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateSubmissionDto } from './dto/create-submission.dto.js';
 import { GradeSubmissionDto } from './dto/grade-submission.dto.js';
+import { PaymentsService } from '../payments/payments.service.js';
 
 @Injectable()
 export class SubmissionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly paymentsService: PaymentsService,
+  ) {}
 
   async create(userId: string, dto: CreateSubmissionDto) {
     const student = await this.prisma.studentProfile.findUnique({
@@ -32,6 +36,15 @@ export class SubmissionsService {
     if (student.user.status !== 'ACTIVE') {
       throw new ForbiddenException(
         'El estudiante no está habilitado para entregar tareas',
+      );
+    }
+    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
+      student.id,
+    );
+
+    if (debtStatus.SUSPEND) {
+      throw new ForbiddenException(
+        'No puede enviar tareas porque tiene obligaciones financieras vencidas',
       );
     }
 

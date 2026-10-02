@@ -7,10 +7,14 @@ import {
 
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto.js';
+import { PaymentsService } from '../payments/payments.service.js';
 
 @Injectable()
 export class EnrollmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly paymentsService: PaymentsService,
+  ) {}
 
   async create(userId: string, dto: CreateEnrollmentDto) {
     const student = await this.prisma.studentProfile.findUnique({
@@ -29,6 +33,15 @@ export class EnrollmentsService {
     if (student.user.status !== 'ACTIVE') {
       throw new ForbiddenException(
         'El estudiante no está habilitado para matricularse',
+      );
+    }
+    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
+      student.id,
+    );
+
+    if (debtStatus.SUSPEND) {
+      throw new ForbiddenException(
+        'No puede matricularse porque tiene obligaciones financieras vencidas',
       );
     }
 
@@ -159,7 +172,7 @@ export class EnrollmentsService {
           status: 'ACTIVE',
         },
       });
-      if (enrolledCount >= group.maxCapacity) {
+      if (enrollmentCount >= group.maxCapacity) {
         throw new BadRequestException(
           'El grupo ya alcanzo su capacidad maxima',
         );
