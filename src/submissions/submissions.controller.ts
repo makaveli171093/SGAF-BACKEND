@@ -7,7 +7,7 @@ import {
   Param,
   Patch,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Role } from '../generated/prisma/enums.js';
 import { Roles } from '../auth/decorators/roles.decorators.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
@@ -23,6 +23,11 @@ import { GradeSubmissionDto } from './dto/grade-submission.dto.js';
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
 
+  @ApiOperation({
+    summary: 'Enviar tarea',
+    description:
+      'Uso: STUDENT autenticado y ACTIVE. El estudiante debe estar matriculado en el grupo de la tarea, entregar antes de la fecha límite y no tener deuda vencida. Solo se permite una entrega por tarea y estudiante.',
+  })
   @Post()
   @Roles(Role.STUDENT)
   create(
@@ -32,6 +37,11 @@ export class SubmissionsController {
     return this.submissionsService.create(req.user.id, dto);
   }
 
+  @ApiOperation({
+    summary: 'Calificar entrega',
+    description:
+      'Uso: TEACHER. Permite calificar una entrega únicamente si el docente autenticado está asignado al grupo de la tarea. La nota debe estar entre 1 y 100 y puede incluir retroalimentación.',
+  })
   @Patch(':id/grade')
   @Roles(Role.TEACHER)
   grade(

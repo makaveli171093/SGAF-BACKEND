@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsUUID } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 import { PaymentMethod } from '../../generated/prisma/enums.js';
 
 export class CreateManualPaymentDto {
@@ -17,4 +17,12 @@ export class CreateManualPaymentDto {
   })
   @IsIn([PaymentMethod.CASH, PaymentMethod.BANK_TRANSFER])
   method: PaymentMethod;
+
+  @ApiPropertyOptional({
+    description: 'Número de recibo o comprobante del pago manual',
+    example: 'REC-2026-000123',
+  })
+  @IsOptional()
+  @IsString()
+  receiptNumber?: string;
 }

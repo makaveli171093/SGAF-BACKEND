@@ -32,4 +32,26 @@ export class SubjectsService {
       subject,
     };
   }
+
+  async findAll() {
+    const subjects = await this.prisma.subject.findMany({
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        credits: true,
+        enrollmentFee: true,
+        monthlyFee: true,
+        active: true,
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      message: 'Materias obtenidas correctamente',
+      subjects,
+    };
+  }
 }

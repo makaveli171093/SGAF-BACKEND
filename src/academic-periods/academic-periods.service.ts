@@ -31,4 +31,25 @@ export class AcademicPeriodsService {
       academicPeriod,
     };
   }
+
+  async findAll() {
+    const periods = await this.prisma.academicPeriod.findMany({
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+        endDate: true,
+        maxCredits: true,
+        status: true,
+      },
+      orderBy: {
+        startDate: 'desc',
+      },
+    });
+
+    return {
+      message: 'Periodos academicos obtenidos correctamente',
+      periods,
+    };
+  }
 }

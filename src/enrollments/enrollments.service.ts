@@ -8,6 +8,11 @@ import {
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto.js';
 import { PaymentsService } from '../payments/payments.service.js';
+import {
+  EnrollmentStatus,
+  ObligationStatus,
+  ObligationType,
+} from '../generated/prisma/enums.js';
 
 @Injectable()
 export class EnrollmentsService {
@@ -70,7 +75,7 @@ export class EnrollmentsService {
       );
     }
 
-    const currrentEnrollments = await this.prisma.enrollment.findMany({
+    const currentEnrollments = await this.prisma.enrollment.findMany({
       where: {
         studentId: student.id,
         status: 'ACTIVE',
@@ -86,7 +91,7 @@ export class EnrollmentsService {
         },
       },
     });
-    const currentCredits = currrentEnrollments.reduce(
+    const currentCredits = currentEnrollments.reduce(
       (total, enrollment) => total + enrollment.group.subject.credits,
       0,
     );
@@ -148,13 +153,13 @@ export class EnrollmentsService {
     });
 
     for (const enrollment of enrolledGroups) {
-      for (const exisitingBlock of enrollment.group.scheduleBlocks) {
+      for (const existingBlock of enrollment.group.scheduleBlocks) {
         for (const newBlock of group.scheduleBlocks) {
-          const sameDay = exisitingBlock.dayOfWeek === newBlock.dayOfWeek;
+          const sameDay = existingBlock.dayOfWeek === newBlock.dayOfWeek;
 
           const overlap =
-            exisitingBlock.startTime < newBlock.endTime &&
-            exisitingBlock.endTime > newBlock.startTime;
+            existingBlock.startTime < newBlock.endTime &&
+            existingBlock.endTime > newBlock.startTime;
 
           if (sameDay && overlap) {
             throw new BadRequestException(
@@ -165,18 +170,20 @@ export class EnrollmentsService {
       }
     }
 
-    const enrollment = await this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const enrollmentCount = await tx.enrollment.count({
         where: {
           groupId: group.id,
           status: 'ACTIVE',
         },
       });
+
       if (enrollmentCount >= group.maxCapacity) {
         throw new BadRequestException(
           'El grupo ya alcanzo su capacidad maxima',
         );
       }
+
       const duplicateEnrollment = await tx.enrollment.findFirst({
         where: {
           studentId: student.id,
@@ -194,7 +201,7 @@ export class EnrollmentsService {
         );
       }
 
-      return tx.enrollment.create({
+      const enrollment = await tx.enrollment.create({
         data: {
           studentId: student.id,
           groupId: group.id,
@@ -209,11 +216,123 @@ export class EnrollmentsService {
           },
         },
       });
+
+      const enrollmentFeeDueDate = new Date();
+      enrollmentFeeDueDate.setDate(enrollmentFeeDueDate.getDate() + 7);
+
+      const monthlyFeeDueDate = new Date();
+      monthlyFeeDueDate.setMonth(monthlyFeeDueDate.getMonth() + 1);
+
+      const enrollmentObligation = await tx.financialObligation.create({
+        data: {
+          studentId: student.id,
+          type: ObligationType.ENROLLMENT,
+          description: `Inscripción - ${group.subject.name}`,
+          amount: group.subject.enrollmentFee,
+          dueDate: enrollmentFeeDueDate,
+          status: ObligationStatus.PENDING,
+        },
+      });
+
+      const monthlyObligation = await tx.financialObligation.create({
+        data: {
+          studentId: student.id,
+          type: ObligationType.MONTHLY_FEE,
+          description: `Mensualidad - ${group.subject.name}`,
+          amount: group.subject.monthlyFee,
+          dueDate: monthlyFeeDueDate,
+          status: ObligationStatus.PENDING,
+        },
+      });
+
+      return {
+        enrollment,
+        enrollmentObligation,
+        monthlyObligation,
+      };
     });
 
     return {
-      message: 'Matrícula registrada correctamente',
-      enrollment,
+      message: 'Matrícula creada exitosamente',
+      enrollment: result.enrollment,
+      obligations: [result.enrollmentObligation, result.monthlyObligation],
+    };
+  }
+
+  async getMyEnrollments(userId: string) {
+    const student = await this.prisma.studentProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException(
+        'No existe un perfil estudiantil asociado al usuario',
+      );
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        studentId: student.id,
+      },
+      select: {
+        id: true,
+        status: true,
+        enrolledAt: true,
+
+        group: {
+          select: {
+            name: true,
+            maxCapacity: true,
+
+            subject: {
+              select: {
+                code: true,
+                name: true,
+                credits: true,
+              },
+            },
+
+            academicPeriod: {
+              select: {
+                name: true,
+                startDate: true,
+                endDate: true,
+                status: true,
+              },
+            },
+
+            scheduleBlocks: {
+              select: {
+                dayOfWeek: true,
+                startTime: true,
+                endTime: true,
+              },
+            },
+
+            teacher: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    phone: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        enrolledAt: 'desc',
+      },
+    });
+
+    return {
+      message: 'Matrículas obtenidas correctamente',
+      enrollments,
     };
   }
 }

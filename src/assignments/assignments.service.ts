@@ -85,4 +85,93 @@ export class AssignmentsService {
       assignment,
     };
   }
+
+  async getMyAssignments(userId: string) {
+    const student = await this.prisma.studentProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException(
+        'No existe un perfil estudiantil asociado al usuario',
+      );
+    }
+
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: {
+        studentId: student.id,
+        status: 'ACTIVE',
+      },
+      select: {
+        groupId: true,
+      },
+    });
+
+    const groupIds = enrollments.map((enrollment) => enrollment.groupId);
+
+    const assignments = await this.prisma.assignment.findMany({
+      where: {
+        groupId: {
+          in: groupIds,
+        },
+      },
+      select: {
+        id: true,
+        tittle: true,
+        instructions: true,
+        dueDate: true,
+        createdAt: true,
+
+        group: {
+          select: {
+            id: true,
+            name: true,
+
+            subject: {
+              select: {
+                code: true,
+                name: true,
+              },
+            },
+
+            teacher: {
+              select: {
+                user: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        submissions: {
+          where: {
+            studentId: student.id,
+          },
+          select: {
+            id: true,
+            textContent: true,
+            fileUrl: true,
+            grade: true,
+            feedback: true,
+            gradedAt: true,
+            submittedAt: true,
+          },
+        },
+      },
+      orderBy: {
+        dueDate: 'asc',
+      },
+    });
+
+    return {
+      message: 'Tareas obtenidas correctamente',
+      assignments,
+    };
+  }
 }

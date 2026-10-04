@@ -255,13 +255,43 @@ export class PaymentsService {
       );
     }
 
-    const payment = await this.prisma.payment.create({
-      data: {
-        obligationId: obligation.id,
-        amount: obligation.amount,
-        method: dto.method,
-        status: PaymentStatus.PENDING,
-      },
+    if (dto.method === PaymentMethod.BANK_TRANSFER && !dto.receiptNumber) {
+      throw new BadRequestException(
+        'El número de comprobante es obligatorio para transferencias bancarias',
+      );
+    }
+
+    const payment = await this.prisma.$transaction(async (tx) => {
+      const createdPayment = await tx.payment.create({
+        data: {
+          obligationId: obligation.id,
+          amount: obligation.amount,
+          method: dto.method,
+          status: PaymentStatus.PENDING,
+
+          receiptNumber:
+            dto.method === PaymentMethod.BANK_TRANSFER
+              ? dto.receiptNumber
+              : null,
+        },
+      });
+
+      if (dto.method === PaymentMethod.CASH) {
+        const year = new Date().getFullYear();
+
+        const generatedReceiptNumber = `CASH-${year}-${createdPayment.id.slice(0, 8).toUpperCase()}`;
+
+        return tx.payment.update({
+          where: {
+            id: createdPayment.id,
+          },
+          data: {
+            receiptNumber: generatedReceiptNumber,
+          },
+        });
+      }
+
+      return createdPayment;
     });
 
     return {
@@ -513,6 +543,86 @@ export class PaymentsService {
         externalReference: payment.externalReference,
       },
       checkoutUrl: mockPayPayment.checkout_url,
+    };
+  }
+
+  async getMyFinancialHistory(userId: string) {
+    const student = await this.prisma.studentProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (!student) {
+      throw new NotFoundException(
+        'No existe un perfil estudiantil asociado al usuario',
+      );
+    }
+
+    const obligations = await this.prisma.financialObligation.findMany({
+      where: {
+        studentId: student.id,
+      },
+      include: {
+        payments: {
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+      orderBy: {
+        dueDate: 'desc',
+      },
+    });
+
+    return {
+      message: 'Historial financiero obtenido correctamente',
+      financialHistory: obligations,
+    };
+  }
+
+  async getPendingObligations() {
+    const obligations = await this.prisma.financialObligation.findMany({
+      where: {
+        status: {
+          in: [ObligationStatus.PENDING, ObligationStatus.OVERDUE],
+        },
+      },
+
+      select: {
+        id: true,
+        type: true,
+        description: true,
+        amount: true,
+        dueDate: true,
+        status: true,
+        createdAt: true,
+
+        student: {
+          select: {
+            enrollmentCode: true,
+
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                ci: true,
+                phone: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+
+      orderBy: {
+        dueDate: 'asc',
+      },
+    });
+
+    return {
+      message: 'Obligaciones financieras pendientes obtenidas correctamente',
+      obligations,
     };
   }
 }

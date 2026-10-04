@@ -97,4 +97,129 @@ export class GroupsService {
       group,
     };
   }
+
+  async getMyGroups(userId: string) {
+    const teacher = await this.prisma.teacherProfile.findUnique({
+      where: {
+        userId,
+      },
+    });
+
+    if (!teacher) {
+      throw new NotFoundException(
+        'No existe un perfil docente asociado al usuario',
+      );
+    }
+
+    const groups = await this.prisma.group.findMany({
+      where: {
+        teacherId: teacher.id,
+      },
+      select: {
+        id: true,
+        name: true,
+        maxCapacity: true,
+
+        subject: {
+          select: {
+            code: true,
+            name: true,
+            credits: true,
+          },
+        },
+
+        academicPeriod: {
+          select: {
+            name: true,
+            startDate: true,
+            endDate: true,
+            status: true,
+          },
+        },
+
+        scheduleBlocks: {
+          select: {
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
+          },
+        },
+
+        _count: {
+          select: {
+            enrollments: true,
+            assignments: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      message: 'Grupos del docente obtenidos correctamente',
+      groups,
+    };
+  }
+
+  async findAll() {
+    const groups = await this.prisma.group.findMany({
+      select: {
+        id: true,
+        name: true,
+        maxCapacity: true,
+
+        subject: {
+          select: {
+            code: true,
+            name: true,
+            credits: true,
+          },
+        },
+
+        academicPeriod: {
+          select: {
+            id: true,
+            name: true,
+            status: true,
+          },
+        },
+
+        teacher: {
+          select: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                phone: true,
+              },
+            },
+          },
+        },
+
+        scheduleBlocks: {
+          select: {
+            dayOfWeek: true,
+            startTime: true,
+            endTime: true,
+          },
+        },
+
+        _count: {
+          select: {
+            enrollments: true,
+          },
+        },
+      },
+      orderBy: {
+        name: 'asc',
+      },
+    });
+
+    return {
+      message: 'Grupos obtenidos correctamente',
+      groups,
+    };
+  }
 }

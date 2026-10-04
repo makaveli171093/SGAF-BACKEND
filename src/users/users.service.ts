@@ -161,4 +161,41 @@ export class UsersService {
       user: approvedUser,
     };
   }
+
+  async findAll() {
+    const users = await this.prisma.user.findMany({
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        ci: true,
+        phone: true,
+        role: true,
+        status: true,
+        createdAt: true,
+
+        stundentProfile: {
+          select: {
+            enrollmentCode: true,
+          },
+        },
+
+        teacherProfile: {
+          select: {
+            specialty: true,
+            hireDate: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    return {
+      message: 'Usuarios obtenidos correctamente',
+      users,
+    };
+  }
 }
