@@ -7,6 +7,8 @@ import {
   Patch,
   Param,
   Get,
+  Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Role } from '../generated/prisma/enums.js';
@@ -39,15 +41,15 @@ export class PaymentsController {
     return this.paymentsService.getMyFinancialHistory(req.user.id);
   }
 
-  @Get('pending-obligations')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.RECEPCIONIST)
   @ApiOperation({
     summary: 'Consultar obligaciones financieras pendientes',
     description:
       'Uso: RECEPCIONIST autenticado. Devuelve las obligaciones financieras pendientes o vencidas de los estudiantes, con la información necesaria para identificar al alumno y gestionar el cobro.',
   })
+  @Get('pending-obligations')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECEPCIONIST)
   getPendingObligations() {
     return this.paymentsService.getPendingObligations();
   }
@@ -71,10 +73,17 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Recibir confirmación de MockPay',
     description:
-      'Uso: MockPay, no requiere JWT. Recibe el resultado asíncrono de una transacción. SUCCEEDED cambia Payment a APPROVED y la obligación a PAID; FAILED cambia Payment a REJECTED. El procesamiento es idempotente.',
+      'Uso: MockPay, no requiere JWT. Recibe el resultado asíncrono de una transacción. SUCCEEDED cambia Payment a APPROVED y la obligación a PAID; FAILED cambia Payment a REJECTED. El procesamiento es idempotente. Valida un token secreto antes de procesar el resultado asíncrono de la transacción.',
   })
   @Post('webhook')
-  handleWebhook(@Body() dto: MockPayWebhookDto) {
+  async handleWebhook(
+    @Query('token') token: string,
+    @Body() dto: MockPayWebhookDto,
+  ) {
+    if (!token || token !== process.env.MOCKPAY_WEBHOOK_SECRET) {
+      throw new UnauthorizedException('Webhook no autorizado');
+    }
+
     return this.paymentsService.handleMockPayWebhook(dto);
   }
 

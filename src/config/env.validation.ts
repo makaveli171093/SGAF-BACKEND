@@ -18,4 +18,8 @@ export const envValidationSchema = Joi.object({
   MOCKPAY_SECRET_KEY: Joi.string().required(),
 
   MOCKPAY_CURRENCY: Joi.string().length(3).default('USD'),
+
+  MOCKPAY_WEBHOOK_SECRET: Joi.string().required(),
+
+  APP_BASE_URL: Joi.string().uri().required(),
 });

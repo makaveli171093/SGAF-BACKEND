@@ -5,6 +5,7 @@ interface CreateMockPayPaymentInput {
   amount: number;
   currency: string;
   metadata: Record<string, string>;
+  webhook_url?: string;
 }
 
 interface MockPayApiResponse {

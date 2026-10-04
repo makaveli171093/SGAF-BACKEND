@@ -89,6 +89,12 @@ export class PaymentsService {
         obligationId: dto.obligationId,
         studentId: obligation.studentId,
       },
+      webhook_url:
+        `${this.configService.getOrThrow<string>('APP_BASE_URL')}` +
+        `/api/v1/payments/webhook?token=` +
+        encodeURIComponent(
+          this.configService.getOrThrow<string>('MOCKPAY_WEBHOOK_SECRET'),
+        ),
     });
 
     const payment = await this.prisma.payment.create({
@@ -518,6 +524,12 @@ export class PaymentsService {
         obligation_id: obligation.id,
         student_id: obligation.studentId,
       },
+      webhook_url:
+        `${this.configService.getOrThrow<string>('APP_BASE_URL')}` +
+        `/api/v1/payments/webhook?token=` +
+        encodeURIComponent(
+          this.configService.getOrThrow<string>('MOCKPAY_WEBHOOK_SECRET'),
+        ),
     });
 
     const payment = await this.prisma.payment.create({
