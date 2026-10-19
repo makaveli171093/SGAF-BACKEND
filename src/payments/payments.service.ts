@@ -22,6 +22,7 @@ import { MockPayWebhookDto } from './dto/mockpay-webhook.dto.js';
 import { CreateManualPaymentDto } from './dto/create-manual-payment.dto.js';
 import { VerifyManualPaymentDto } from './dto/verify-manual-payment.dto.js';
 import { CreateApplicantOnlinePaymentDto } from './dto/create-applicant-online-payment.dto.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class PaymentsService {
@@ -38,7 +39,7 @@ export class PaymentsService {
       include: {
         student: {
           include: {
-            user: true,
+            user: { select: publicUserSelect },
           },
         },
       },
@@ -401,7 +402,7 @@ export class PaymentsService {
         id: studentId,
       },
       include: {
-        user: true,
+        user: { select: publicUserSelect },
         financialObligations: true,
       },
     });
@@ -462,7 +463,7 @@ export class PaymentsService {
       include: {
         student: {
           include: {
-            user: true,
+            user: { select: publicUserSelect },
           },
         },
       },
@@ -615,13 +616,7 @@ export class PaymentsService {
             enrollmentCode: true,
 
             user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                ci: true,
-                phone: true,
-                status: true,
-              },
+              select: publicUserSelect,
             },
           },
         },

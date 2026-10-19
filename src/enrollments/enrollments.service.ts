@@ -8,11 +8,8 @@ import {
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto.js';
 import { PaymentsService } from '../payments/payments.service.js';
-import {
-  EnrollmentStatus,
-  ObligationStatus,
-  ObligationType,
-} from '../generated/prisma/enums.js';
+import { ObligationStatus, ObligationType } from '../generated/prisma/enums.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class EnrollmentsService {
@@ -27,7 +24,7 @@ export class EnrollmentsService {
         userId,
       },
       include: {
-        user: true,
+        user: { select: publicUserSelect },
       },
     });
     if (!student) {
@@ -314,11 +311,7 @@ export class EnrollmentsService {
             teacher: {
               select: {
                 user: {
-                  select: {
-                    firstName: true,
-                    lastName: true,
-                    phone: true,
-                  },
+                  select: publicUserSelect,
                 },
               },
             },

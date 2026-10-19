@@ -128,11 +128,7 @@ export class AuthService {
     if (user.status === 'PENDING_APPROVAL') {
       throw new ForbiddenException('La cuenta esta pendiente de aprobacion');
     }
-    if (user.status === 'SUSPEND_FOR_DEBT') {
-      throw new ForbiddenException(
-        'La cuenta esta suspendida por obligaciones financieras',
-      );
-    }
+
     if (user.status === 'INACTIVE') {
       throw new ForbiddenException('La cuenta esta inactiva');
     }
@@ -154,6 +150,7 @@ export class AuthService {
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
+        phone: user.phone,
         role: user.role,
         status: user.status,
       },

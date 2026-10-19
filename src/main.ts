@@ -38,4 +38,7 @@ async function bootstrap() {
   console.log(`SGAF API running on http://localhost:${port}/api/v1`);
 }
 
-bootstrap();
+bootstrap().catch((error) => {
+  console.error('Error al iniciar la aplicación:', error);
+  process.exit(1);
+});

@@ -13,6 +13,7 @@ import {
 } from '../generated/prisma/enums.js';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateStaffUserDto } from './dto/create-staff-user.dto.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class UsersService {
@@ -82,12 +83,7 @@ export class UsersService {
     return {
       message: 'Usuario creado exitosamente',
       user: {
-        id: result.user.id,
-        email: result.user.email,
-        firstName: result.user.firstName,
-        lastName: result.user.lastName,
-        role: result.user.role,
-        status: result.user.status,
+        select: publicUserSelect,
         teacherProfile: result.teacherProfile
           ? {
               id: result.teacherProfile.id,
@@ -154,6 +150,7 @@ export class UsersService {
       data: {
         status: UserStatus.ACTIVE,
       },
+      select: publicUserSelect,
     });
 
     return {

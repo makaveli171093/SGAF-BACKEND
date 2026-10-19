@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateAssignmentDto } from './dto/create-assignment.dto.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class AssignmentsService {
@@ -17,7 +18,7 @@ export class AssignmentsService {
         userId,
       },
       include: {
-        user: true,
+        user: { select: publicUserSelect },
       },
     });
 
@@ -139,10 +140,7 @@ export class AssignmentsService {
             teacher: {
               select: {
                 user: {
-                  select: {
-                    firstName: true,
-                    lastName: true,
-                  },
+                  select: publicUserSelect,
                 },
               },
             },

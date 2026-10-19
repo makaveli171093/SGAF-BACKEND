@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service.js';
 import { CreateGroupDto } from './dto/create-group.dto.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class GroupsService {
@@ -47,7 +48,9 @@ export class GroupsService {
         id: dto.teacherId,
       },
       include: {
-        user: true,
+        user: {
+          select: publicUserSelect,
+        },
       },
     });
 
@@ -86,7 +89,9 @@ export class GroupsService {
         academicPeriod: true,
         teacher: {
           include: {
-            user: true,
+            user: {
+              select: publicUserSelect,
+            },
           },
         },
       },
@@ -189,11 +194,7 @@ export class GroupsService {
         teacher: {
           select: {
             user: {
-              select: {
-                firstName: true,
-                lastName: true,
-                phone: true,
-              },
+              select: publicUserSelect,
             },
           },
         },

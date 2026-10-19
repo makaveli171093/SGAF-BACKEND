@@ -31,7 +31,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
-    if (user.status !== 'ACTIVE') {
+    if (user.status === 'PENDING_APPROVAL' || user.status === 'INACTIVE') {
       throw new UnauthorizedException('Usuario sin acceso al sistema');
     }
     return {

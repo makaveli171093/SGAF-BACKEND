@@ -9,6 +9,7 @@ import { PrismaService } from '../database/prisma.service.js';
 import { CreateSubmissionDto } from './dto/create-submission.dto.js';
 import { GradeSubmissionDto } from './dto/grade-submission.dto.js';
 import { PaymentsService } from '../payments/payments.service.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
 
 @Injectable()
 export class SubmissionsService {
@@ -23,7 +24,9 @@ export class SubmissionsService {
         userId,
       },
       include: {
-        user: true,
+        user: {
+          select: publicUserSelect,
+        },
       },
     });
 
@@ -137,7 +140,9 @@ export class SubmissionsService {
         userId,
       },
       include: {
-        user: true,
+        user: {
+          select: publicUserSelect,
+        },
       },
     });
 
@@ -167,7 +172,9 @@ export class SubmissionsService {
         },
         student: {
           include: {
-            user: true,
+            user: {
+              select: publicUserSelect,
+            },
           },
         },
       },
@@ -204,7 +211,9 @@ export class SubmissionsService {
         },
         student: {
           include: {
-            user: true,
+            user: {
+              select: publicUserSelect,
+            },
           },
         },
       },
