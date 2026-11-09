@@ -87,6 +87,21 @@ export class AssignmentsService {
     };
   }
 
+  async getTeacherAssignments(userId: string) {
+    const assignments = await this.prisma.assignment.findMany({
+      where: { group: { teacher: { userId } } },
+      include: {
+        group: { include: { subject: true, academicPeriod: true } },
+        _count: { select: { submissions: true } },
+      },
+      orderBy: { dueDate: 'asc' },
+    });
+    return {
+      message: 'Tareas del docente obtenidas correctamente',
+      assignments,
+    };
+  }
+
   async getMyAssignments(userId: string) {
     const student = await this.prisma.studentProfile.findUnique({
       where: {

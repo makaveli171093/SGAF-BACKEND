@@ -7,6 +7,27 @@ export const envValidationSchema = Joi.object({
 
   PORT: Joi.number().port().default(3000),
 
+  CORS_ORIGINS: Joi.string()
+    .custom((value: string, helpers) => {
+      const origins = value.split(',').map((origin) => origin.trim());
+      try {
+        if (
+          origins.some((origin) => {
+            const url = new URL(origin);
+            return (
+              !['http:', 'https:'].includes(url.protocol) ||
+              url.origin !== origin
+            );
+          })
+        )
+          return helpers.error('any.invalid');
+      } catch {
+        return helpers.error('any.invalid');
+      }
+      return value;
+    })
+    .default('http://localhost:5173'),
+
   DATABASE_URL: Joi.string().required(),
 
   JWT_SECRET: Joi.string().min(16).required(),

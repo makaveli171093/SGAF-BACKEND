@@ -41,6 +41,15 @@ export class PaymentsController {
     return this.paymentsService.getMyFinancialHistory(req.user.id);
   }
 
+  @Get('manual/pending')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECEPCIONIST)
+  @ApiOperation({ summary: 'Listar pagos manuales pendientes de verificación' })
+  getPendingManualPayments() {
+    return this.paymentsService.getPendingManualPayments();
+  }
+
   @ApiOperation({
     summary: 'Consultar obligaciones financieras pendientes',
     description:
@@ -57,7 +66,7 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Crear intención de pago online',
     description:
-      'Uso: STUDENT autenticado y ACTIVE. Recibe una obligación financiera propia y crea una intención de pago en MockPay. Devuelve checkoutUrl. El estado final se actualiza mediante webhook.',
+      'Uso: STUDENT autenticado, ACTIVE o SUSPEND_FOR_DEBT. Recibe una obligación financiera propia y crea una intención de pago en MockPay. Devuelve checkoutUrl. El estado final se actualiza mediante webhook.',
   })
   @Post('online')
   @ApiBearerAuth()

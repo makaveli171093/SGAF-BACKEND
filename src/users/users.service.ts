@@ -60,6 +60,7 @@ export class UsersService {
           role: dto.role,
           status: 'ACTIVE',
         },
+        select: publicUserSelect,
       });
 
       let teacherProfile = null;
@@ -83,7 +84,7 @@ export class UsersService {
     return {
       message: 'Usuario creado exitosamente',
       user: {
-        select: publicUserSelect,
+        ...result.user,
         teacherProfile: result.teacherProfile
           ? {
               id: result.teacherProfile.id,
@@ -159,6 +160,29 @@ export class UsersService {
     };
   }
 
+  async findPendingApplicants() {
+    const applicants = await this.prisma.user.findMany({
+      where: { role: Role.STUDENT, status: UserStatus.PENDING_APPROVAL },
+      select: {
+        ...publicUserSelect,
+        stundentProfile: {
+          select: {
+            enrollmentCode: true,
+            financialObligations: {
+              where: { type: ObligationType.ENROLLMENT },
+              select: { id: true, amount: true, status: true, dueDate: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    return {
+      message: 'Postulantes pendientes obtenidos correctamente',
+      applicants,
+    };
+  }
+
   async findAll() {
     const users = await this.prisma.user.findMany({
       select: {
@@ -180,6 +204,7 @@ export class UsersService {
 
         teacherProfile: {
           select: {
+            id: true,
             specialty: true,
             hireDate: true,
           },

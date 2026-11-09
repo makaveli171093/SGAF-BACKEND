@@ -33,6 +33,15 @@ export class UsersController {
     return this.usersService.createStaff(dto);
   }
 
+  @Get('applicants/pending')
+  @Roles(Role.RECEPCIONIST)
+  @ApiOperation({
+    summary: 'Listar postulantes pendientes y su matrícula para Recepción',
+  })
+  findPendingApplicants() {
+    return this.usersService.findPendingApplicants();
+  }
+
   @ApiOperation({
     summary: 'Aprobar postulante',
     description:

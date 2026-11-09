@@ -32,14 +32,14 @@ export class EnrollmentsService {
         'No existe un perfil estudiantil asociado al usuario',
       );
     }
-    if (student.user.status !== 'ACTIVE') {
+    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
+      student.id,
+    );
+    if (debtStatus.status !== 'ACTIVE' && !debtStatus.SUSPEND) {
       throw new ForbiddenException(
         'El estudiante no está habilitado para matricularse',
       );
     }
-    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
-      student.id,
-    );
 
     if (debtStatus.SUSPEND) {
       throw new ForbiddenException(
