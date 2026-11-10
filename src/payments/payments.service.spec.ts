@@ -142,3 +142,35 @@ describe('Mora y pagos', () => {
     );
   });
 });
+
+describe('Mora en historial financiero', () => {
+  it.each([UserStatus.ACTIVE, UserStatus.SUSPEND_FOR_DEBT])(
+    'retorna el estado sincronizado %s y conserva el historial',
+    async (status) => {
+      const prisma = {
+        studentProfile: { findUnique: vi.fn().mockResolvedValue({ id: 's1' }) },
+        financialObligation: {
+          findMany: vi.fn().mockResolvedValue([{ id: 'o1' }]),
+        },
+      };
+      const service = new PaymentsService(
+        prisma as never,
+        {} as never,
+        {} as never,
+      );
+      const sync = vi
+        .spyOn(service, 'syncStudentDebtStatus')
+        .mockResolvedValue({
+          status,
+          SUSPEND: status === UserStatus.SUSPEND_FOR_DEBT,
+        });
+      const result = await service.getMyFinancialHistory('u1');
+      expect(result.userStatus).toBe(status);
+      expect(result.financialHistory).toEqual([{ id: 'o1' }]);
+      expect(sync).toHaveBeenCalledWith('s1');
+      expect(sync.mock.invocationCallOrder[0]).toBeLessThan(
+        prisma.financialObligation.findMany.mock.invocationCallOrder[0],
+      );
+    },
+  );
+});

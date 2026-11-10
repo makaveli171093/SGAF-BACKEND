@@ -10,6 +10,9 @@ import bcrypt from 'bcrypt';
 import crypto from 'node:crypto';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { PaymentsService } from '../payments/payments.service.js';
+import { publicUserSelect } from '../common/selects/user-public.select.js';
+import { Role, UserStatus } from '../generated/prisma/enums.js';
 import { LoginDto } from './dto/login.dto.js';
 import {
   ObligationStatus,
@@ -22,6 +25,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly paymentsService: PaymentsService,
   ) {}
 
   async registerStudent(dto: RegisterStudentDto) {
@@ -132,6 +136,8 @@ export class AuthService {
     if (user.status === 'INACTIVE') {
       throw new ForbiddenException('La cuenta esta inactiva');
     }
+    user.status = await this.getCurrentStatus(user);
+
     const payload = {
       sub: user.id,
       role: user.role,
@@ -155,6 +161,48 @@ export class AuthService {
         status: user.status,
       },
     };
+  }
+
+  async getProfile(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: publicUserSelect,
+    });
+    if (!user) throw new UnauthorizedException('Usuario no encontrado');
+    user.status = await this.getCurrentStatus(user);
+    return { user };
+  }
+
+  private async getCurrentStatus(user: {
+    id: string;
+    role: Role;
+    status: UserStatus;
+  }) {
+    if (
+      user.status === UserStatus.PENDING_APPROVAL ||
+      user.status === UserStatus.INACTIVE
+    ) {
+      throw new ForbiddenException('Usuario sin acceso al sistema');
+    }
+    if (user.role !== Role.STUDENT) return user.status;
+
+    const student = await this.prisma.studentProfile.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    });
+    if (!student)
+      throw new ForbiddenException('El usuario no tiene perfil de estudiante');
+
+    const { status } = await this.paymentsService.syncStudentDebtStatus(
+      student.id,
+    );
+    if (
+      status === UserStatus.PENDING_APPROVAL ||
+      status === UserStatus.INACTIVE
+    ) {
+      throw new ForbiddenException('Usuario sin acceso al sistema');
+    }
+    return status;
   }
 
   private generateEnrollmentCode(): string {

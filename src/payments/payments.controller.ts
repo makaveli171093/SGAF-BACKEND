@@ -31,7 +31,7 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Consultar historial financiero propio',
     description:
-      'Uso: STUDENT autenticado. Devuelve todas sus obligaciones financieras y los pagos asociados a cada una, incluyendo intentos aprobados, rechazados o pendientes.',
+      'Uso: STUDENT autenticado. Devuelve todas sus obligaciones financieras y los pagos asociados a cada una, incluyendo intentos aprobados, rechazados o pendientes. Sincroniza la mora y devuelve userStatus actualizado.',
   })
   @Get('my-history')
   @ApiBearerAuth()

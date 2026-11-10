@@ -315,3 +315,23 @@ Las pruebas unitarias usan datos simulados; no certifican Render, Supabase ni
 MockPay. Probar con las variables reales: registro, pago, aprobación, login,
 matrícula, tarea, entrega y calificación. Comprobar mora y recuperación tras pago,
 permisos entre docentes y CORS desde el dominio publicado del frontend.
+
+
+## Actualización de mora al acceder — 10 de noviembre de 2026
+
+`POST /api/v1/auth/login` recalcula la mora después de validar credenciales,
+solo para estudiantes habilitados. `GET /api/v1/auth/me` devuelve el usuario
+público con el estado sincronizado. `GET /api/v1/payments/my-history` conserva
+`message` y `financialHistory` y agrega `userStatus` actualizado.
+
+El frontend debe actualizar su usuario en Zustand con `user.status` de login/perfil
+y con `userStatus` del historial. Tras un pago confirmado, debe volver a consultar
+perfil o historial. El JWT no contiene el estado de mora; no debe inferirse de él.
+El suspendido conserva acceso a perfil y pagos; las operaciones académicas siguen
+validando en backend. No se agrega una tarea programada: sin consultas u operaciones,
+el estado persistido puede permanecer desactualizado hasta el siguiente acceso.
+
+La regla sigue siendo obligación vencida no pagada ni cancelada. El estado
+`OVERDUE` de cada obligación no se actualiza en esta revisión; la mora del usuario
+se calcula usando fecha de vencimiento y estado. Fechas enviadas con zona horaria
+explícita; el corte es el instante `dueDate`, no necesariamente el final del día.

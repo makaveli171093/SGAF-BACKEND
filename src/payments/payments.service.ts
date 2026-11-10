@@ -594,6 +594,8 @@ export class PaymentsService {
       );
     }
 
+    const { status: userStatus } = await this.syncStudentDebtStatus(student.id);
+
     const obligations = await this.prisma.financialObligation.findMany({
       where: {
         studentId: student.id,
@@ -613,6 +615,7 @@ export class PaymentsService {
     return {
       message: 'Historial financiero obtenido correctamente',
       financialHistory: obligations,
+      userStatus,
     };
   }
 
