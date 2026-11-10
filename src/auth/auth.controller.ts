@@ -16,15 +16,13 @@ export class AuthController {
   @ApiOperation({
     summary: 'Consultar usuario autenticado',
     description:
-      'Uso: usuario autenticado. Devuelve los datos del usuario identificado por el JWT. Sirve para comprobar sesión, rol y estado actual.',
+      'Uso: usuario autenticado. Devuelve los datos del usuario identificado por el JWT. Actualiza la mora del estudiante antes de devolver su estado; el suspendido conserva acceso al perfil y a finanzas.',
   })
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  getProfile(@Req() req: any) {
-    return {
-      user: req.user,
-    };
+  getProfile(@Req() req: { user: { id: string } }) {
+    return this.authService.getProfile(req.user.id);
   }
 
   @ApiOperation({

@@ -152,7 +152,7 @@ export class GroupsService {
 
         _count: {
           select: {
-            enrollments: true,
+            enrollments: { where: { status: 'ACTIVE' } },
             assignments: true,
           },
         },
@@ -209,7 +209,7 @@ export class GroupsService {
 
         _count: {
           select: {
-            enrollments: true,
+            enrollments: { where: { status: 'ACTIVE' } },
           },
         },
       },

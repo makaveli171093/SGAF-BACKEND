@@ -1,4 +1,6 @@
 import {
+  Get,
+  ParseUUIDPipe,
   Body,
   Controller,
   Post,
@@ -22,6 +24,16 @@ import { GradeSubmissionDto } from './dto/grade-submission.dto.js';
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SubmissionsController {
   constructor(private readonly submissionsService: SubmissionsService) {}
+
+  @Get('assignment/:assignmentId')
+  @Roles(Role.TEACHER)
+  @ApiOperation({ summary: 'Listar entregas de una tarea propia del docente' })
+  findByAssignment(
+    @Param('assignmentId', ParseUUIDPipe) assignmentId: string,
+    @Req() req: { user: { id: string } },
+  ) {
+    return this.submissionsService.findByAssignment(req.user.id, assignmentId);
+  }
 
   @ApiOperation({
     summary: 'Enviar tarea',

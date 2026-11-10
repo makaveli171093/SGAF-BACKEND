@@ -28,6 +28,15 @@ export class AssignmentsController {
     return this.assignmentsService.create(req.user.id, dto);
   }
 
+  @Get('teacher')
+  @Roles(Role.TEACHER)
+  @ApiOperation({
+    summary: 'Listar tareas de los grupos del docente autenticado',
+  })
+  getTeacherAssignments(@Req() req: { user: { id: string } }) {
+    return this.assignmentsService.getTeacherAssignments(req.user.id);
+  }
+
   @ApiOperation({
     summary: 'Consultar mis tareas',
     description:

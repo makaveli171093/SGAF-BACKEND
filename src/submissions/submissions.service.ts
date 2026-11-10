@@ -36,14 +36,14 @@ export class SubmissionsService {
       );
     }
 
-    if (student.user.status !== 'ACTIVE') {
+    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
+      student.id,
+    );
+    if (debtStatus.status !== 'ACTIVE' && !debtStatus.SUSPEND) {
       throw new ForbiddenException(
         'El estudiante no está habilitado para entregar tareas',
       );
     }
-    const debtStatus = await this.paymentsService.syncStudentDebtStatus(
-      student.id,
-    );
 
     if (debtStatus.SUSPEND) {
       throw new ForbiddenException(
@@ -132,6 +132,33 @@ export class SubmissionsService {
       message: 'Entrega registrada correctamente',
       submission,
     };
+  }
+
+  async findByAssignment(userId: string, assignmentId: string) {
+    const assignment = await this.prisma.assignment.findUnique({
+      where: { id: assignmentId },
+      include: { group: { include: { teacher: true } } },
+    });
+    if (!assignment) throw new NotFoundException('La tarea no existe');
+    if (assignment.group.teacher.userId !== userId) {
+      throw new ForbiddenException(
+        'El docente no está autorizado para consultar estas entregas',
+      );
+    }
+    const submissions = await this.prisma.submission.findMany({
+      where: { assignmentId },
+      include: {
+        student: {
+          select: {
+            id: true,
+            enrollmentCode: true,
+            user: { select: publicUserSelect },
+          },
+        },
+      },
+      orderBy: { submittedAt: 'asc' },
+    });
+    return { message: 'Entregas obtenidas correctamente', submissions };
   }
 
   async grade(userId: string, submissionId: string, dto: GradeSubmissionDto) {

@@ -1,114 +1,337 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# SGAF — Sistema de Gestión Académica y Financiera
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+API RESTful desarrollada con NestJS, Prisma y PostgreSQL para centralizar la gestión académica, financiera y de usuarios de una institución educativa.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 1. Objetivo
 
-## Description
+SGAF reemplaza procesos manuales basados en papel por una API centralizada que permite gestionar usuarios y roles, postulantes, periodos académicos, materias, grupos, horarios, matrículas, tareas, entregas, obligaciones financieras, pagos y suspensión por mora.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 2. Tecnologías
 
-## Project setup
+- NestJS
+- TypeScript
+- Prisma ORM
+- PostgreSQL
+- Passport JWT
+- Swagger / OpenAPI
+- Joi
+- bcrypt
+- MockPay
+- Render
+- Supabase
 
-```bash
-$ npm install
+## 3. Arquitectura
+
+Módulos principales:
+
+- `auth`
+- `users`
+- `academic-periods`
+- `subjects`
+- `groups`
+- `schedule-blocks`
+- `enrollments`
+- `assignments`
+- `submissions`
+- `payments`
+
+La capa de datos utiliza Prisma mediante un `PrismaService` centralizado.
+
+## 4. Roles
+
+### ADMIN
+Puede crear usuarios internos, consultar usuarios y gestionar la estructura académica.
+
+### RECEPCIONIST
+Puede registrar y verificar pagos manuales, consultar obligaciones pendientes y aprobar postulantes cuando su matrícula está pagada.
+
+### TEACHER
+Puede consultar sus grupos, crear tareas en grupos asignados y calificar entregas.
+
+### STUDENT
+Puede consultar matrículas, tareas e historial financiero, entregar trabajos y matricularse si cumple las reglas.
+
+## 5. Estados de usuario
+
+- `PENDING_APPROVAL`
+- `ACTIVE`
+- `SUSPEND_FOR_DEBT`
+- `INACTIVE`
+
+Un postulante nace en `PENDING_APPROVAL` y no puede iniciar sesión hasta que Recepción verifique el pago y lo apruebe.
+
+## 6. Reglas de matriculación
+
+Antes de matricular:
+
+1. el periodo debe estar activo;
+2. no se puede exceder el máximo de créditos;
+3. el grupo debe tener cupo;
+4. no se puede cursar la misma materia dos veces en el mismo periodo;
+5. no puede existir traslape de horarios;
+6. el estudiante no puede tener deuda vencida.
+
+La matrícula se ejecuta en transacción y vuelve a validar condiciones críticas de concurrencia.
+
+Al matricularse se generan obligaciones financieras de inscripción y mensualidad asociadas a la materia.
+
+## 7. Aula virtual
+
+Flujo LMS:
+
+1. el docente crea una tarea;
+2. el estudiante matriculado realiza una entrega;
+3. el docente registra nota y feedback.
+
+## 8. Finanzas
+
+### Obligaciones
+- `ENROLLMENT`
+- `MONTHLY_FEE`
+- `OTHER`
+
+Estados:
+- `PENDING`
+- `PAID`
+- `OVERDUE`
+- `CACELLED`
+
+### Métodos de pago
+- `CASH`
+- `BANK_TRANSFER`
+- `ONLINE`
+
+### Estados de pago
+- `PENDING`
+- `APPROVED`
+- `REJECTED`
+
+Los pagos manuales quedan pendientes hasta ser verificados por Recepción.
+
+- `CASH`: genera recibo interno.
+- `BANK_TRANSFER`: requiere comprobante.
+- La verificación registra usuario y fecha.
+
+Los pagos online crean una intención en MockPay y guardan la referencia externa.
+
+El webhook:
+- valida un token secreto;
+- valida referencia externa;
+- valida obligación;
+- valida monto;
+- procesa de forma idempotente;
+- actualiza pago y obligación.
+
+## 9. Suspensión por mora
+
+La mora se maneja de forma reactiva.
+
+Antes de operaciones sensibles se ejecuta una sincronización del estado financiero.
+
+Si existe una obligación vencida no pagada:
+- el usuario pasa a `SUSPEND_FOR_DEBT`;
+- no puede crear matrículas;
+- no puede entregar tareas.
+
+Cuando ya no existen deudas vencidas, puede volver a `ACTIVE`.
+
+Mejora futura: scheduler diario.
+
+## 10. GET útiles
+
+### ADMIN
+- `GET /api/v1/users`
+
+### Catálogos
+- `GET /api/v1/subjects`
+- `GET /api/v1/academic-periods`
+- `GET /api/v1/groups`
+
+### TEACHER
+- `GET /api/v1/groups/my-groups`
+
+### STUDENT
+- `GET /api/v1/enrollments/my-enrollments`
+- `GET /api/v1/assignments/my-assignments`
+- `GET /api/v1/payments/my-history`
+
+### RECEPCIONIST
+- `GET /api/v1/payments/pending-obligations`
+
+## 11. Seguridad
+
+- JWT
+- guards de roles
+- ValidationPipe global
+- DTOs con `class-validator`
+- bcrypt
+- variables sensibles fuera del repositorio
+- `select` de Prisma para mínima exposición de datos
+- webhook protegido con secreto adicional
+
+## 12. Swagger
+
+Ruta:
+
+`/api/docs`
+
+Swagger documenta roles, finalidad, DTOs, requisitos y autenticación Bearer.
+
+## 13. Base de datos
+
+El modelo cubre:
+
+- usuarios;
+- perfiles de estudiantes;
+- perfiles de docentes;
+- periodos;
+- materias;
+- grupos;
+- horarios;
+- matrículas;
+- tareas;
+- entregas;
+- obligaciones financieras;
+- pagos.
+
+## 14. Seed de demostración
+
+Incluye:
+
+- ADMIN;
+- RECEPCIONIST;
+- varios TEACHER;
+- varios STUDENT;
+- postulante pendiente;
+- estudiante suspendido;
+- periodos cerrado, activo y planificado;
+- materias;
+- grupos;
+- horarios;
+- matrículas;
+- tareas;
+- entregas calificadas y pendientes;
+- obligaciones financieras;
+- pagos manuales y online.
+
+## 15. Variables de entorno
+
+```env
+DATABASE_URL=
+JWT_SECRET=
+PORT=
+NODE_ENV=
+MOCKPAY_API_URL=
+MOCKPAY_SECRET_KEY=
+MOCKPAY_CURRENCY=
+APP_BASE_URL=
+MOCKPAY_WEBHOOK_SECRET=
 ```
 
-## Compile and run the project
+Nunca subir secretos reales al repositorio.
+
+## 16. Ejecución local
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
+npx prisma generate
+npm run build
+npm run start:dev
 ```
 
-## Run tests
+Seed:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run seed
 ```
 
-## Deployment
+## 17. Despliegue
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- API: Render
+- PostgreSQL: Supabase
+- Documentación: Swagger
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## 18. Limitación externa actual
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+La nueva pasarela MockPay proporcionada externamente actualmente puede responder `502`.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+La integración está desacoplada mediante variables de entorno, por lo que el cambio de endpoint no requiere modificar la lógica de SGAF.
 
-## Observability
+## 19. Mejoras futuras
 
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
+- scheduler de mora;
+- refresh tokens;
+- auditoría ampliada;
+- soft delete selectivo;
+- mensualidades recurrentes automáticas;
+- frontend completo;
+- reportes académicos y financieros.
 
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
 
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
+## Preparación para el frontend — 9 de noviembre de 2026
 
-## Resources
+El frontend será un repositorio independiente: Vite, React, TypeScript, Tailwind,
+Axios, Zustand, React Hook Form y Zod, con rutas protegidas, Custom Hooks y
+estados de UI de la malla. Esta revisión no agrega dependencias ni migraciones.
 
-Check out a few resources that may come in handy when working with NestJS:
+### Conexión
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observer](https://observer.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Backend: configurar `CORS_ORIGINS` con orígenes exactos separados por coma,
+sin barra final: `http://localhost:5173,https://TU-FRONTEND.vercel.app`.
+Sustituir el dominio de ejemplo por el real. Por defecto solo se permite
+`http://localhost:5173`.
+Frontend: `VITE_API_URL=https://sgaf-backend.onrender.com/api/v1`.
+Enviar `Authorization: Bearer <accessToken>`. Los secretos de JWT, base de datos
+y MockPay se configuran exclusivamente en el backend.
 
-## Support
+### Consultas para completar los flujos existentes
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Ruta GET (prefijo /api/v1) | Rol | Respuesta |
+| --- | --- | --- |
+| /assignments/teacher | TEACHER | `{ message, assignments }` de sus grupos |
+| /submissions/assignment/:assignmentId | TEACHER propietario | `{ message, submissions }` |
+| /users/applicants/pending | RECEPCIONIST | `{ message, applicants }` con matrícula |
+| /payments/manual/pending | RECEPCIONIST | `{ message, payments }` |
 
-## Stay in touch
+Las listas vacías devuelven `[]`. Una tarea ajena produce 403; una inexistente,
+404. `GET /users` incluye `teacherProfile.id` para seleccionar al docente.
+`POST /users/staff` devuelve identidad pública y perfil. Se conservan los nombres
+históricos `tittle`, `stundentProfile` y `RECEPCIONIST`.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Estados y pagos
 
-## License
+La mora solo cambia `ACTIVE` y `SUSPEND_FOR_DEBT`. `PENDING_APPROVAL` requiere
+aprobación de Recepción e `INACTIVE` permanece inactivo. El pago online aprobado
+sincroniza la mora; repetir su webhook reintenta esa sincronización sin otro pago.
+Matrículas y entregas consultan el estado sincronizado antes de continuar.
+La mora se evalúa al operar; no hay una tarea programada diaria.
+Los nuevos pagos usan `obligation_id` y `student_id`; se aceptan los nombres
+históricos en intenciones anteriores y se comprueba cada identificador recibido.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Validación antes del despliegue
+
+Ejecutar `npm ci`, `npm run build`, `npm test` y `npm run lint`.
+Las pruebas unitarias usan datos simulados; no certifican Render, Supabase ni
+MockPay. Probar con las variables reales: registro, pago, aprobación, login,
+matrícula, tarea, entrega y calificación. Comprobar mora y recuperación tras pago,
+permisos entre docentes y CORS desde el dominio publicado del frontend.
+
+
+## Actualización de mora al acceder — 10 de noviembre de 2026
+
+`POST /api/v1/auth/login` recalcula la mora después de validar credenciales,
+solo para estudiantes habilitados. `GET /api/v1/auth/me` devuelve el usuario
+público con el estado sincronizado. `GET /api/v1/payments/my-history` conserva
+`message` y `financialHistory` y agrega `userStatus` actualizado.
+
+El frontend debe actualizar su usuario en Zustand con `user.status` de login/perfil
+y con `userStatus` del historial. Tras un pago confirmado, debe volver a consultar
+perfil o historial. El JWT no contiene el estado de mora; no debe inferirse de él.
+El suspendido conserva acceso a perfil y pagos; las operaciones académicas siguen
+validando en backend. No se agrega una tarea programada: sin consultas u operaciones,
+el estado persistido puede permanecer desactualizado hasta el siguiente acceso.
+
+La regla sigue siendo obligación vencida no pagada ni cancelada. El estado
+`OVERDUE` de cada obligación no se actualiza en esta revisión; la mora del usuario
+se calcula usando fecha de vencimiento y estado. Fechas enviadas con zona horaria
+explícita; el corte es el instante `dueDate`, no necesariamente el final del día.

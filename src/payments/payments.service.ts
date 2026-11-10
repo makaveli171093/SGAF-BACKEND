@@ -87,8 +87,8 @@ export class PaymentsService {
       amount,
       currency: this.configService.get<string>('MOCKPAY_CURRENCY', 'USD'),
       metadata: {
-        obligationId: dto.obligationId,
-        studentId: obligation.studentId,
+        obligation_id: dto.obligationId,
+        student_id: obligation.studentId,
       },
       webhook_url:
         `${this.configService.getOrThrow<string>('APP_BASE_URL')}` +
@@ -141,9 +141,18 @@ export class PaymentsService {
         'No existe un pago asociado a la transacción recibida',
       );
     }
+    // Accept the previous naming for payment intents already created.
+    const obligationIds = [
+      dto.metadata?.obligation_id,
+      dto.metadata?.obligationId,
+    ].filter((id) => id !== undefined);
+    const studentIds = [
+      dto.metadata?.student_id,
+      dto.metadata?.studentId,
+    ].filter((id) => id !== undefined);
     if (
-      dto.metadata?.obligation_id &&
-      dto.metadata.obligation_id !== payment.obligationId
+      obligationIds.some((id) => id !== payment.obligationId) ||
+      studentIds.some((id) => id !== payment.obligation.studentId)
     ) {
       throw new BadRequestException(
         'La obligación informada por MockPay no coincide con el pago registrado',
@@ -162,6 +171,9 @@ export class PaymentsService {
       payment.status === PaymentStatus.APPROVED ||
       payment.status === PaymentStatus.REJECTED
     ) {
+      if (payment.status === PaymentStatus.APPROVED) {
+        await this.syncStudentDebtStatus(payment.obligation.studentId);
+      }
       return {
         message: 'Webhook ya procesado anteriormente',
         paymentId: payment.id,
@@ -206,6 +218,7 @@ export class PaymentsService {
         };
       });
 
+      await this.syncStudentDebtStatus(payment.obligation.studentId);
       return {
         message: 'Pago aprobado correctamente',
         payment: result.updatedPayment,
@@ -411,6 +424,13 @@ export class PaymentsService {
       throw new NotFoundException('El estudiante no existe');
     }
 
+    if (
+      student.user.status === UserStatus.INACTIVE ||
+      student.user.status === UserStatus.PENDING_APPROVAL
+    ) {
+      return { SUSPEND: false, status: student.user.status };
+    }
+
     const now = new Date();
 
     const hasOverdueDebt = student.financialObligations.some(
@@ -425,6 +445,7 @@ export class PaymentsService {
         await this.prisma.user.update({
           where: {
             id: student.userId,
+            status: UserStatus.ACTIVE,
           },
           data: {
             status: UserStatus.SUSPEND_FOR_DEBT,
@@ -442,6 +463,7 @@ export class PaymentsService {
       await this.prisma.user.update({
         where: {
           id: student.userId,
+          status: UserStatus.SUSPEND_FOR_DEBT,
         },
         data: {
           status: UserStatus.ACTIVE,
@@ -572,6 +594,8 @@ export class PaymentsService {
       );
     }
 
+    const { status: userStatus } = await this.syncStudentDebtStatus(student.id);
+
     const obligations = await this.prisma.financialObligation.findMany({
       where: {
         studentId: student.id,
@@ -591,6 +615,34 @@ export class PaymentsService {
     return {
       message: 'Historial financiero obtenido correctamente',
       financialHistory: obligations,
+      userStatus,
+    };
+  }
+
+  async getPendingManualPayments() {
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        status: PaymentStatus.PENDING,
+        method: { in: [PaymentMethod.CASH, PaymentMethod.BANK_TRANSFER] },
+      },
+      include: {
+        obligation: {
+          include: {
+            student: {
+              select: {
+                id: true,
+                enrollmentCode: true,
+                user: { select: publicUserSelect },
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+    });
+    return {
+      message: 'Pagos manuales pendientes obtenidos correctamente',
+      payments,
     };
   }
 

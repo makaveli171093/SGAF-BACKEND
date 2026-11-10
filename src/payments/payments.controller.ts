@@ -31,7 +31,7 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Consultar historial financiero propio',
     description:
-      'Uso: STUDENT autenticado. Devuelve todas sus obligaciones financieras y los pagos asociados a cada una, incluyendo intentos aprobados, rechazados o pendientes.',
+      'Uso: STUDENT autenticado. Devuelve todas sus obligaciones financieras y los pagos asociados a cada una, incluyendo intentos aprobados, rechazados o pendientes. Sincroniza la mora y devuelve userStatus actualizado.',
   })
   @Get('my-history')
   @ApiBearerAuth()
@@ -39,6 +39,15 @@ export class PaymentsController {
   @Roles(Role.STUDENT)
   getMyFinancialHistory(@Req() req: { user: { id: string } }) {
     return this.paymentsService.getMyFinancialHistory(req.user.id);
+  }
+
+  @Get('manual/pending')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.RECEPCIONIST)
+  @ApiOperation({ summary: 'Listar pagos manuales pendientes de verificación' })
+  getPendingManualPayments() {
+    return this.paymentsService.getPendingManualPayments();
   }
 
   @ApiOperation({
@@ -57,7 +66,7 @@ export class PaymentsController {
   @ApiOperation({
     summary: 'Crear intención de pago online',
     description:
-      'Uso: STUDENT autenticado y ACTIVE. Recibe una obligación financiera propia y crea una intención de pago en MockPay. Devuelve checkoutUrl. El estado final se actualiza mediante webhook.',
+      'Uso: STUDENT autenticado, ACTIVE o SUSPEND_FOR_DEBT. Recibe una obligación financiera propia y crea una intención de pago en MockPay. Devuelve checkoutUrl. El estado final se actualiza mediante webhook.',
   })
   @Post('online')
   @ApiBearerAuth()
