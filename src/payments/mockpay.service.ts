@@ -1,4 +1,4 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 interface CreateMockPayPaymentInput {
@@ -21,6 +21,7 @@ interface MockPayPaymentResponse {
 
 @Injectable()
 export class MockPayService {
+  private readonly logger = new Logger(MockPayService.name);
   constructor(private readonly configService: ConfigService) {}
   async createPayment(
     input: CreateMockPayPaymentInput,
@@ -43,6 +44,10 @@ export class MockPayService {
     const responseText = await response.text();
 
     if (!response.ok) {
+      this.logger.error(
+        `MockPay rechazó la creación del pago. HTTP ${response.status}`,
+      );
+
       throw new BadGatewayException('No se pudo comunicar con MockPay');
     }
 
