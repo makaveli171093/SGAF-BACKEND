@@ -335,3 +335,32 @@ La regla sigue siendo obligación vencida no pagada ni cancelada. El estado
 `OVERDUE` de cada obligación no se actualiza en esta revisión; la mora del usuario
 se calcula usando fecha de vencimiento y estado. Fechas enviadas con zona horaria
 explícita; el corte es el instante `dueDate`, no necesariamente el final del día.
+
+## Activar y cerrar períodos académicos
+
+`PATCH /api/v1/academic-periods/:id/status` requiere JWT y rol `ADMIN`.
+El identificador debe ser UUID. El cuerpo admite únicamente:
+
+```json
+{ "status": "ACTIVE" }
+```
+
+o `{ "status": "CLOSED" }`. Devuelve `{ message, academicPeriod }`;
+`academicPeriod` incluye id, name, startDate, endDate, maxCredits y status.
+
+- La creación sigue produciendo `PLANNED`.
+- `PLANNED → ACTIVE`: solamente entre startDate y endDate, ambos inclusive.
+- `PLANNED → CLOSED` y `ACTIVE → CLOSED`: cierre manual permitido.
+- Un período cerrado no se reabre ni se devuelve a planificado.
+- Repetir el estado actual devuelve éxito sin modificar datos.
+- Un cambio concurrente devuelve 409 y exige consultar de nuevo.
+- Cuerpo/UUID inválidos o activación fuera de fechas: 400; sin permisos: 403;
+  período inexistente: 404; reapertura de período cerrado: 409.
+
+El frontend debe enviar fechas con zona horaria explícita, solicitar confirmación
+antes del cierre y refrescar el listado tras la respuesta. No necesita migración
+de base de datos ni variables de entorno nuevas. No hay cierre automático al
+vencer las fechas: las inscripciones conservan su validación de estado y vigencia.
+Cerrar no borra grupos, inscripciones, entregas ni obligaciones existentes.
+Las entregas existentes conservan las reglas actuales (inscripción activa, mora
+y plazo de tarea); este endpoint no añade un bloqueo de entregas por período.
