@@ -12,6 +12,12 @@ Migración aditiva `20261115090000_operational_improvements`:
 
 La migración no borra usuarios, pagos, tareas ni inscripciones. No se ha ejecutado sobre producción.
 
+### Arranque en Render
+
+Render debe conservar `npm run start:prod` como Start Command. Su hook `prestart:prod` ejecuta `npm run migrate:deploy` contra la misma `DATABASE_URL` antes de iniciar Nest. Esto evita servir una versión que consulte columnas todavía inexistentes (P2022). Prisma CLI está en dependencias de producción para que el paso también funcione si se omiten dependencias de desarrollo.
+
+Si la migración falla, el proceso no inicia la API: revisar el error concreto en Render. No se ejecutan `db push`, `migrate reset`, seed ni resoluciones automáticas de historial. Si el historial previo de Prisma no está registrado o la conexión no permite migrar, se debe corregir ese caso antes de volver a desplegar. No hay que crear otra base ni cambiar de proveedor.
+
 ## Preparar una base de prueba
 
 Usar un PostgreSQL de prueba separado y las variables requeridas por `src/config/env.validation.ts`. No ejecutar `migrate reset` ni apuntar una prueba destructiva a producción.
