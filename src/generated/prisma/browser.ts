@@ -77,3 +77,8 @@ export type FinancialObligation = Prisma.FinancialObligationModel
  * 
  */
 export type Payment = Prisma.PaymentModel
+/**
+ * Model AuditEvent
+ * 
+ */
+export type AuditEvent = Prisma.AuditEventModel

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Role } from '../generated/prisma/enums.js';
 import { Roles } from '../auth/decorators/roles.decorators.js';
@@ -21,7 +21,10 @@ export class ScheduleBlocksController {
   })
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() dto: CreateScheduleBlockDto) {
-    return this.scheduleBlocksService.create(dto);
+  create(
+    @Body() dto: CreateScheduleBlockDto,
+    @Req() req: { user: { id: string } },
+  ) {
+    return this.scheduleBlocksService.create(dto, req.user.id);
   }
 }

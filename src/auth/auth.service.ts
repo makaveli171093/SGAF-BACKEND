@@ -140,6 +140,7 @@ export class AuthService {
 
     const payload = {
       sub: user.id,
+      tokenVersion: user.tokenVersion,
       role: user.role,
     };
 
@@ -157,6 +158,7 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         phone: user.phone,
+        avatarData: user.avatarData,
         role: user.role,
         status: user.status,
       },
@@ -166,7 +168,7 @@ export class AuthService {
   async getProfile(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: publicUserSelect,
+      select: { ...publicUserSelect, avatarData: true },
     });
     if (!user) throw new UnauthorizedException('Usuario no encontrado');
     user.status = await this.getCurrentStatus(user);

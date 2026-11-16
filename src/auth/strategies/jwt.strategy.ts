@@ -7,6 +7,7 @@ import { PrismaService } from '../../database/prisma.service.js';
 interface JwtPayload {
   sub: string;
   role: string;
+  tokenVersion?: number;
 }
 
 @Injectable()
@@ -27,10 +28,21 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       where: {
         id: payload.sub,
       },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        status: true,
+        tokenVersion: true,
+      },
     });
     if (!user) {
       throw new UnauthorizedException('Usuario no encontrado');
     }
+    if ((payload.tokenVersion ?? 0) !== user.tokenVersion)
+      throw new UnauthorizedException('Sesión revocada');
     if (user.status === 'PENDING_APPROVAL' || user.status === 'INACTIVE') {
       throw new UnauthorizedException('Usuario sin acceso al sistema');
     }
