@@ -69,6 +69,8 @@ enum PaymentStatus {
 model User {
   id           String     @id @default(uuid())
   email        String     @unique
+  avatarData   String?
+  tokenVersion Int @default(0)
   passwordHash String
   firstName    String
   lastName     String
@@ -300,4 +302,15 @@ model Payment {
   updatedAt DateTime @updatedAt
 
   @@map("payments")
+}
+
+model AuditEvent {
+  id String @id @default(uuid())
+  actorId String
+  action String
+  entityId String
+  detail String
+  createdAt DateTime @default(now())
+  @@index([entityId, createdAt])
+  @@map("audit_events")
 }

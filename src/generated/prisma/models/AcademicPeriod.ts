@@ -427,14 +427,6 @@ export type AcademicPeriodScalarRelationFilter = {
   isNot?: Prisma.AcademicPeriodWhereInput
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type EnumAcademicPeriodStatusFieldUpdateOperationsInput = {
   set?: $Enums.AcademicPeriodStatus
 }

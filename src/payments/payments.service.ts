@@ -199,6 +199,7 @@ export class PaymentsService {
           },
           data: {
             status: PaymentStatus.APPROVED,
+            verfiedAt: new Date(),
             gatewayResponse,
           },
         });
@@ -662,6 +663,18 @@ export class PaymentsService {
         dueDate: true,
         status: true,
         createdAt: true,
+        payments: {
+          select: {
+            id: true,
+            amount: true,
+            method: true,
+            status: true,
+            receiptNumber: true,
+            createdAt: true,
+            verfiedAt: true,
+          },
+          orderBy: { createdAt: 'desc' },
+        },
 
         student: {
           select: {

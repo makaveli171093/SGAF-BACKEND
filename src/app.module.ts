@@ -1,3 +1,4 @@
+import { OperationsModule } from './operations/operations.module.js';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { createObserveModule } from '@nestjs/observe';
@@ -27,6 +28,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PrismaModule,
     AuthModule,
     UsersModule,
+    OperationsModule,
     AcademicPeriodsModule,
     SubjectsModule,
     GroupsModule,

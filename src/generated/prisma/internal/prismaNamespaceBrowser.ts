@@ -62,7 +62,8 @@ export const ModelName = {
   Assignment: 'Assignment',
   Submission: 'Submission',
   FinancialObligation: 'FinancialObligation',
-  Payment: 'Payment'
+  Payment: 'Payment',
+  AuditEvent: 'AuditEvent'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -84,6 +85,8 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 export const UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
+  avatarData: 'avatarData',
+  tokenVersion: 'tokenVersion',
   passwordHash: 'passwordHash',
   firstName: 'firstName',
   lastName: 'lastName',
@@ -249,6 +252,18 @@ export const PaymentScalarFieldEnum = {
 } as const
 
 export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const AuditEventScalarFieldEnum = {
+  id: 'id',
+  actorId: 'actorId',
+  action: 'action',
+  entityId: 'entityId',
+  detail: 'detail',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditEventScalarFieldEnum = (typeof AuditEventScalarFieldEnum)[keyof typeof AuditEventScalarFieldEnum]
 
 
 export const SortOrder = {

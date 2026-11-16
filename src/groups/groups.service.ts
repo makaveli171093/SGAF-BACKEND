@@ -124,6 +124,9 @@ export class GroupsService {
         id: true,
         name: true,
         maxCapacity: true,
+        subjectId: true,
+        academicPeriodId: true,
+        teacherId: true,
 
         subject: {
           select: {
@@ -144,6 +147,7 @@ export class GroupsService {
 
         scheduleBlocks: {
           select: {
+            id: true,
             dayOfWeek: true,
             startTime: true,
             endTime: true,
@@ -174,6 +178,9 @@ export class GroupsService {
         id: true,
         name: true,
         maxCapacity: true,
+        subjectId: true,
+        academicPeriodId: true,
+        teacherId: true,
 
         subject: {
           select: {
@@ -201,6 +208,7 @@ export class GroupsService {
 
         scheduleBlocks: {
           select: {
+            id: true,
             dayOfWeek: true,
             startTime: true,
             endTime: true,
