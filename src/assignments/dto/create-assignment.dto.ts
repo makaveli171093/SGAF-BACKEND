@@ -25,6 +25,6 @@ export class CreateAssignmentDto {
   @ApiProperty({
     example: '2026-10-05T23:59:00.000Z',
   })
-  @IsDateString()
+  @IsDateString({ strict: true })
   dueDate: string;
 }

@@ -1,3 +1,5 @@
+import { ListQueryDto, pageMeta } from '../common/list-query.dto.js';
+import { assignmentWhere, assignmentOrder } from './assignment-query.js';
 import {
   BadRequestException,
   ForbiddenException,
@@ -87,22 +89,48 @@ export class AssignmentsService {
     };
   }
 
-  async getTeacherAssignments(userId: string) {
+  async getTeacherAssignments(userId: string, query: ListQueryDto = {}) {
+    const where = assignmentWhere({ group: { teacher: { userId } } }, query);
+    const meta = query.page
+      ? pageMeta(await this.prisma.assignment.count({ where }), query)
+      : undefined;
+    const groups = query.page
+      ? await this.prisma.group.findMany({
+          where: { teacher: { userId } },
+          select: {
+            id: true,
+            name: true,
+            subject: { select: { name: true } },
+            academicPeriod: { select: { name: true } },
+          },
+        })
+      : [];
     const assignments = await this.prisma.assignment.findMany({
-      where: { group: { teacher: { userId } } },
+      where,
+      ...(meta
+        ? { skip: (meta.page - 1) * meta.pageSize, take: meta.pageSize }
+        : {}),
       include: {
         group: { include: { subject: true, academicPeriod: true } },
         _count: { select: { submissions: true } },
       },
-      orderBy: { dueDate: 'asc' },
+      orderBy: assignmentOrder(query),
     });
     return {
       message: 'Tareas del docente obtenidas correctamente',
+      pagination: meta,
+      filters: {
+        groups: groups.map((g) => ({
+          id: g.id,
+          label: g.subject.name + ' · ' + g.name,
+        })),
+        periods: [...new Set(groups.map((g) => g.academicPeriod.name))],
+      },
       assignments,
     };
   }
 
-  async getMyAssignments(userId: string) {
+  async getMyAssignments(userId: string, query: ListQueryDto = {}) {
     const student = await this.prisma.studentProfile.findUnique({
       where: {
         userId,
@@ -126,13 +154,26 @@ export class AssignmentsService {
     });
 
     const groupIds = enrollments.map((enrollment) => enrollment.groupId);
+    const where = assignmentWhere(
+      { groupId: { in: groupIds } },
+      query,
+      student.id,
+    );
+    const meta = query.page
+      ? pageMeta(await this.prisma.assignment.count({ where }), query)
+      : undefined;
+    const groups = query.page
+      ? await this.prisma.group.findMany({
+          where: { id: { in: groupIds } },
+          select: { id: true, name: true, subject: { select: { name: true } } },
+        })
+      : [];
 
     const assignments = await this.prisma.assignment.findMany({
-      where: {
-        groupId: {
-          in: groupIds,
-        },
-      },
+      where,
+      ...(meta
+        ? { skip: (meta.page - 1) * meta.pageSize, take: meta.pageSize }
+        : {}),
       select: {
         id: true,
         tittle: true,
@@ -177,13 +218,18 @@ export class AssignmentsService {
           },
         },
       },
-      orderBy: {
-        dueDate: 'asc',
-      },
+      orderBy: assignmentOrder(query),
     });
 
     return {
       message: 'Tareas obtenidas correctamente',
+      pagination: meta,
+      filters: {
+        groups: groups.map((g) => ({
+          id: g.id,
+          label: g.subject.name + ' · ' + g.name,
+        })),
+      },
       assignments,
     };
   }

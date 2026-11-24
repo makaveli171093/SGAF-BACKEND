@@ -364,3 +364,17 @@ vencer las fechas: las inscripciones conservan su validación de estado y vigenc
 Cerrar no borra grupos, inscripciones, entregas ni obligaciones existentes.
 Las entregas existentes conservan las reglas actuales (inscripción activa, mora
 y plazo de tarea); este endpoint no añade un bloqueo de entregas por período.
+
+## Correcciones de consistencia — 24 de noviembre de 2026
+
+- **Transacciones serializables:** matrícula, pago y entrega comprueban sus reglas y escriben dentro de la misma transacción. Conflictos de Prisma y del adaptador PostgreSQL devuelven HTTP 409; no se repiten automáticamente cobros.
+- **Auditoría:** matrícula, entrega, calificación, reserva y verificación de pago dejan un evento con actor y entidad. La nota conserva el valor anterior en el evento.
+- **Idempotencia de pagos:** se reserva una intención antes de llamar al proveedor. Un webhook repetido no liquida otra vez. `payment_id` en metadata permite asociar una confirmación temprana a su reserva. Se validan monto, moneda y referencias.
+- **Conciliación:** si el proveedor no confirma la creación, se conserva el pendiente y se registra `PAYMENT_RECONCILIATION_REQUIRED`. No se debe rechazar ni cobrar otra vez sin contrastar la operación con el proveedor. No hay conciliación automática con un proveedor real en esta versión.
+- **Paginación del servidor:** tareas de estudiante/docente y entregas admiten `page`, `pageSize` (máximo 100), `q`, `status`; tareas también `group`, `period`, `order`. Devuelven `pagination` y opciones de filtros. Sin `page`, se conserva el contrato anterior para clientes existentes.
+- **Validación semántica:** la fecha de una tarea debe existir en el calendario, además de ser futura.
+- **CI:** GitHub Actions compila, revisa el código y ejecuta pruebas unitarias y HTTP contra PostgreSQL aislado.
+
+Verificación local: `npm run build`, `npm run lint`, `npm test` y `npm run test:e2e`. Para E2E, primero aplica las migraciones en una base desechable llamada `sgaf_test` y define `TEST_DATABASE_URL` con localhost. La suite inicia el backend compilado en el puerto 55440; nunca necesita credenciales reales ni cobra a un proveedor.
+
+No se requiere una nueva migración de esquema. Publicar esta rama no equivale a desplegar Render. La suite prueba permisos, capacidad concurrente, pago/verificación concurrentes, tareas, entregas, calificaciones, paginación y conciliación del webhook; no demuestra rendimiento a gran escala ni disponibilidad de un proveedor externo.

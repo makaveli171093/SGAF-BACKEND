@@ -34,6 +34,7 @@ export class MockPayService {
 
     const response = await fetch(`${baseUrl}/api/v1/payments`, {
       method: 'POST',
+      signal: AbortSignal.timeout(20000),
       headers: {
         Authorization: `Bearer ${secretKey}`,
         'Content-Type': 'application/json',

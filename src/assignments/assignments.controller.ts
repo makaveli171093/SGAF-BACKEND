@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Req, UseGuards, Get } from '@nestjs/common';
+import { ListQueryDto } from '../common/list-query.dto.js';
+import {
+  Body,
+  Controller,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  Get,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Role } from '../generated/prisma/enums.js';
 import { Roles } from '../auth/decorators/roles.decorators.js';
@@ -33,8 +42,11 @@ export class AssignmentsController {
   @ApiOperation({
     summary: 'Listar tareas de los grupos del docente autenticado',
   })
-  getTeacherAssignments(@Req() req: { user: { id: string } }) {
-    return this.assignmentsService.getTeacherAssignments(req.user.id);
+  getTeacherAssignments(
+    @Req() req: { user: { id: string } },
+    @Query() query: ListQueryDto,
+  ) {
+    return this.assignmentsService.getTeacherAssignments(req.user.id, query);
   }
 
   @ApiOperation({
@@ -46,7 +58,10 @@ export class AssignmentsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.STUDENT)
-  getMyAssignments(@Req() req: { user: { id: string } }) {
-    return this.assignmentsService.getMyAssignments(req.user.id);
+  getMyAssignments(
+    @Req() req: { user: { id: string } },
+    @Query() query: ListQueryDto,
+  ) {
+    return this.assignmentsService.getMyAssignments(req.user.id, query);
   }
 }
