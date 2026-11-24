@@ -1,5 +1,7 @@
+import { ListQueryDto } from '../common/list-query.dto.js';
 import {
   Get,
+  Query,
   ParseUUIDPipe,
   Body,
   Controller,
@@ -30,9 +32,14 @@ export class SubmissionsController {
   @ApiOperation({ summary: 'Listar entregas de una tarea propia del docente' })
   findByAssignment(
     @Param('assignmentId', ParseUUIDPipe) assignmentId: string,
+    @Query() query: ListQueryDto,
     @Req() req: { user: { id: string } },
   ) {
-    return this.submissionsService.findByAssignment(req.user.id, assignmentId);
+    return this.submissionsService.findByAssignment(
+      req.user.id,
+      assignmentId,
+      query,
+    );
   }
 
   @ApiOperation({

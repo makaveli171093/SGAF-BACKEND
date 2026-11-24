@@ -8,16 +8,19 @@ describe.each(['matrícula', 'entrega'])(
     function setup(status: string, suspend: boolean) {
       const prisma = {
         studentProfile: {
-          findUnique: vi
-            .fn()
-            .mockResolvedValue({
-              id: 'student-1',
-              user: { status: 'SUSPEND_FOR_DEBT' },
-            }),
+          findUnique: vi.fn().mockResolvedValue({
+            id: 'student-1',
+            user: { status },
+          }),
         },
+        $transaction: vi.fn(),
+        financialObligation: { count: vi.fn().mockResolvedValue(0) },
         group: { findUnique: vi.fn().mockResolvedValue(null) },
         assignment: { findUnique: vi.fn().mockResolvedValue(null) },
       };
+      prisma.$transaction.mockImplementation(
+        (fn: (tx: typeof prisma) => unknown) => fn(prisma),
+      );
       const payments = {
         syncStudentDebtStatus: vi
           .fn()

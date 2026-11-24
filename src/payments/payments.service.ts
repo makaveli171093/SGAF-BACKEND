@@ -1,5 +1,7 @@
+import { serializable } from '../common/serializable.js';
 import {
   BadRequestException,
+  BadGatewayException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -31,6 +33,117 @@ export class PaymentsService {
     private readonly mockPayService: MockPayService,
     private readonly configService: ConfigService,
   ) {}
+
+  private async prepareCheckout(obligationId: string, actorId: string) {
+    const reserved = await serializable(this.prisma, async (tx) => {
+      const obligation = await tx.financialObligation.findUnique({
+        where: { id: obligationId },
+      });
+      if (
+        !obligation ||
+        obligation.status === 'PAID' ||
+        obligation.status === 'CACELLED'
+      )
+        throw new ConflictException('La obligación no puede recibir pagos');
+      const existing = await tx.payment.findFirst({
+        where: { obligationId, status: { in: ['PENDING', 'APPROVED'] } },
+      });
+      if (existing) {
+        const payload = existing.gatewayResponse;
+        if (
+          existing.method === 'ONLINE' &&
+          existing.status === 'PENDING' &&
+          payload &&
+          typeof payload === 'object' &&
+          'checkout_url' in payload &&
+          typeof payload.checkout_url === 'string'
+        )
+          return {
+            payment: existing,
+            obligation,
+            checkoutUrl: payload.checkout_url,
+          };
+        throw new ConflictException(
+          'Ya existe un pago pendiente o aprobado para esta obligación. Si el proveedor no respondió, solicita conciliación antes de reintentar.',
+        );
+      }
+      const payment = await tx.payment.create({
+        data: {
+          obligationId,
+          amount: obligation.amount,
+          method: 'ONLINE',
+          status: 'PENDING',
+        },
+      });
+      await tx.auditEvent.create({
+        data: {
+          actorId,
+          action: 'PAYMENT_RESERVED',
+          entityId: payment.id,
+          detail:
+            'Reserva de pago en línea; pendiente de respuesta del proveedor',
+        },
+      });
+      return { payment, obligation };
+    });
+    if ('checkoutUrl' in reserved)
+      return {
+        message: 'Intención de pago existente',
+        payment: reserved.payment,
+        checkoutUrl: reserved.checkoutUrl,
+      };
+    const response = await this.mockPayService
+      .createPayment({
+        amount: Number(reserved.obligation.amount.toString()),
+        currency: this.configService.get<string>('MOCKPAY_CURRENCY', 'USD'),
+        metadata: {
+          obligation_id: obligationId,
+          student_id: reserved.obligation.studentId,
+          payment_id: reserved.payment.id,
+        },
+        webhook_url:
+          this.configService.getOrThrow<string>('APP_BASE_URL') +
+          '/api/v1/payments/webhook?token=' +
+          encodeURIComponent(
+            this.configService.getOrThrow<string>('MOCKPAY_WEBHOOK_SECRET'),
+          ),
+      })
+      .catch(async () => {
+        await this.prisma.auditEvent.create({
+          data: {
+            actorId,
+            action: 'PAYMENT_RECONCILIATION_REQUIRED',
+            entityId: reserved.payment.id,
+            detail:
+              'No se confirmó la respuesta del proveedor; reserva conservada para evitar doble cobro',
+          },
+        });
+        throw new BadGatewayException(
+          'El proveedor no confirmó el pago. No vuelvas a pagarlo: solicita conciliación en recepción.',
+        );
+      });
+    const payment = await this.prisma.payment.update({
+      where: { id: reserved.payment.id },
+      data: {
+        externalReference: response.id,
+        gatewayResponse: {
+          id: response.id,
+          checkout_url: response.checkout_url,
+        },
+      },
+    });
+    return {
+      message: 'Intención de pago creada correctamente',
+      payment: {
+        id: payment.id,
+        status: payment.status,
+        amount: payment.amount,
+        externalReference: payment.externalReference,
+      },
+      checkoutUrl: response.checkout_url,
+    };
+  }
+
   async createOnlinePayment(userId: string, dto: CreateOnlinePaymentDto) {
     const obligation = await this.prisma.financialObligation.findUnique({
       where: {
@@ -67,258 +180,211 @@ export class PaymentsService {
       );
     }
 
-    const existingPendingPayment = await this.prisma.payment.findFirst({
-      where: {
-        obligationId: dto.obligationId,
-        method: PaymentMethod.ONLINE,
-        status: PaymentStatus.PENDING,
-      },
-    });
-
-    if (existingPendingPayment) {
-      throw new ConflictException(
-        'Ya existe un pago online pendiente para esta obligación financiera',
-      );
-    }
-
-    const amount = Number(obligation.amount.toString());
-
-    const mockPayResponse = await this.mockPayService.createPayment({
-      amount,
-      currency: this.configService.get<string>('MOCKPAY_CURRENCY', 'USD'),
-      metadata: {
-        obligation_id: dto.obligationId,
-        student_id: obligation.studentId,
-      },
-      webhook_url:
-        `${this.configService.getOrThrow<string>('APP_BASE_URL')}` +
-        `/api/v1/payments/webhook?token=` +
-        encodeURIComponent(
-          this.configService.getOrThrow<string>('MOCKPAY_WEBHOOK_SECRET'),
-        ),
-    });
-
-    const payment = await this.prisma.payment.create({
-      data: {
-        obligationId: obligation.id,
-        amount: obligation.amount,
-        method: PaymentMethod.ONLINE,
-        status: PaymentStatus.PENDING,
-
-        externalReference: mockPayResponse.id,
-
-        gatewayResponse: {
-          id: mockPayResponse.id,
-          checkout_url: mockPayResponse.checkout_url,
-        },
-      },
-    });
-
-    return {
-      message: 'Intención de pago creada correctamente',
-      payment: {
-        id: payment.id,
-        status: payment.status,
-        amount: payment.amount,
-        externalReference: payment.externalReference,
-      },
-      checkoutUrl: mockPayResponse.checkout_url,
-    };
+    return this.prepareCheckout(obligation.id, userId);
   }
 
   async handleMockPayWebhook(dto: MockPayWebhookDto) {
-    const payment = await this.prisma.payment.findUnique({
-      where: {
-        externalReference: dto.id,
-      },
-      include: {
-        obligation: true,
-      },
-    });
-
-    if (!payment) {
-      throw new NotFoundException(
-        'No existe un pago asociado a la transacción recibida',
-      );
-    }
-    // Accept the previous naming for payment intents already created.
-    const obligationIds = [
-      dto.metadata?.obligation_id,
-      dto.metadata?.obligationId,
-    ].filter((id) => id !== undefined);
-    const studentIds = [
-      dto.metadata?.student_id,
-      dto.metadata?.studentId,
-    ].filter((id) => id !== undefined);
-    if (
-      obligationIds.some((id) => id !== payment.obligationId) ||
-      studentIds.some((id) => id !== payment.obligation.studentId)
-    ) {
-      throw new BadRequestException(
-        'La obligación informada por MockPay no coincide con el pago registrado',
-      );
-    }
-
-    const paymentAmount = Number(payment.amount.toString());
-
-    if (paymentAmount !== dto.amount) {
-      throw new BadRequestException(
-        'El monto informado por MockPay no coincide con el pago registrado',
-      );
-    }
-
-    if (
-      payment.status === PaymentStatus.APPROVED ||
-      payment.status === PaymentStatus.REJECTED
-    ) {
-      if (payment.status === PaymentStatus.APPROVED) {
-        await this.syncStudentDebtStatus(payment.obligation.studentId);
-      }
-      return {
-        message: 'Webhook ya procesado anteriormente',
-        paymentId: payment.id,
-        status: payment.status,
-      };
-    }
-    const gatewayResponse = {
-      event: dto.event,
-      id: dto.id,
-      amount: dto.amount,
-      currency: dto.currency,
-      status: dto.status,
-      failure_reason: dto.failure_reason ?? null,
-      metadata: dto.metadata,
-      created_at: dto.created_at,
-    };
-
-    if (dto.status === 'SUCCEEDED') {
-      const result = await this.prisma.$transaction(async (tx) => {
-        const updatedPayment = await tx.payment.update({
-          where: {
-            id: payment.id,
-          },
-          data: {
-            status: PaymentStatus.APPROVED,
-            verfiedAt: new Date(),
-            gatewayResponse,
-          },
-        });
-
-        const updatedObligation = await tx.financialObligation.update({
-          where: {
-            id: payment.obligationId,
-          },
-          data: {
-            status: ObligationStatus.PAID,
-          },
-        });
-
-        return {
-          updatedPayment,
-          updatedObligation,
-        };
+    const result = await serializable(this.prisma, async (tx) => {
+      let payment = await tx.payment.findUnique({
+        where: { externalReference: dto.id },
+        include: { obligation: true },
       });
-
-      await this.syncStudentDebtStatus(payment.obligation.studentId);
+      if (!payment && typeof dto.metadata?.payment_id === 'string') {
+        payment = await tx.payment.findUnique({
+          where: { id: dto.metadata.payment_id },
+          include: { obligation: true },
+        });
+        if (
+          payment &&
+          (payment.method !== 'ONLINE' ||
+            (payment.externalReference && payment.externalReference !== dto.id))
+        )
+          throw new BadRequestException(
+            'La referencia del proveedor no corresponde a esta reserva',
+          );
+      }
+      if (!payment)
+        throw new NotFoundException(
+          'No existe un pago asociado a la transacción recibida',
+        );
+      const obligationIds = [
+        dto.metadata?.obligation_id,
+        dto.metadata?.obligationId,
+      ].filter((id) => id !== undefined);
+      const studentIds = [
+        dto.metadata?.student_id,
+        dto.metadata?.studentId,
+      ].filter((id) => id !== undefined);
+      if (
+        obligationIds.some((id) => id !== payment.obligationId) ||
+        studentIds.some((id) => id !== payment.obligation.studentId)
+      )
+        throw new BadRequestException(
+          'La obligación informada por MockPay no coincide con el pago registrado',
+        );
+      if (Number(payment.amount.toString()) !== dto.amount)
+        throw new BadRequestException(
+          'El monto informado por MockPay no coincide con el pago registrado',
+        );
+      if (
+        dto.currency !==
+        this.configService.get<string>('MOCKPAY_CURRENCY', 'USD')
+      )
+        throw new BadRequestException(
+          'La moneda informada por MockPay no coincide con la configurada',
+        );
+      if (payment.status !== 'PENDING')
+        return {
+          message: 'Webhook ya procesado anteriormente',
+          paymentId: payment.id,
+          status: payment.status,
+          payment,
+          obligation: payment.obligation,
+        };
+      if (
+        payment.obligation.status === 'PAID' ||
+        payment.obligation.status === 'CACELLED'
+      )
+        throw new ConflictException(
+          'La obligación ya fue liquidada o cancelada',
+        );
+      const status =
+        dto.status === 'SUCCEEDED'
+          ? PaymentStatus.APPROVED
+          : PaymentStatus.REJECTED;
+      const updated = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          status,
+          externalReference: dto.id,
+          verfiedAt: new Date(),
+          gatewayResponse: {
+            event: dto.event,
+            id: dto.id,
+            amount: dto.amount,
+            currency: dto.currency,
+            status: dto.status,
+            failure_reason: dto.failure_reason ?? null,
+            metadata: dto.metadata,
+            created_at: dto.created_at,
+          },
+        },
+      });
+      const obligation =
+        status === 'APPROVED'
+          ? await tx.financialObligation.update({
+              where: { id: payment.obligationId },
+              data: { status: 'PAID' },
+            })
+          : payment.obligation;
+      await tx.auditEvent.create({
+        data: {
+          actorId: 'mockpay',
+          action: 'PAYMENT_' + status,
+          entityId: payment.id,
+          detail: 'Confirmación del proveedor de pagos',
+        },
+      });
       return {
-        message: 'Pago aprobado correctamente',
-        payment: result.updatedPayment,
-        obligation: result.updatedObligation,
+        message:
+          status === 'APPROVED'
+            ? 'Pago aprobado correctamente'
+            : 'Pago rechazado por MockPay',
+        payment: updated,
+        obligation,
       };
-    }
-    await this.syncStudentDebtStatus(payment.obligation.studentId);
-    const rejectedPayment = await this.prisma.payment.update({
-      where: {
-        id: payment.id,
-      },
-      data: {
-        status: PaymentStatus.REJECTED,
-        gatewayResponse,
-      },
     });
-
-    return {
-      message: 'Pago rechazado por MockPay',
-      payment: rejectedPayment,
-    };
+    if (dto.status === 'SUCCEEDED')
+      await this.syncStudentDebtStatus(result.obligation.studentId);
+    return result;
   }
 
-  async createManualPayment(dto: CreateManualPaymentDto) {
-    const obligation = await this.prisma.financialObligation.findUnique({
-      where: {
-        id: dto.obligationId,
-      },
-    });
-
-    if (!obligation) {
-      throw new NotFoundException('La obligación financiera no existe');
-    }
-
-    if (
-      obligation.status === ObligationStatus.PAID ||
-      obligation.status === ObligationStatus.CACELLED
-    ) {
-      throw new BadRequestException(
-        'La obligación no puede recibir nuevos pagos',
-      );
-    }
-
-    const existingPayment = await this.prisma.payment.findFirst({
-      where: {
-        obligationId: obligation.id,
-        status: PaymentStatus.PENDING,
-      },
-    });
-
-    if (existingPayment) {
-      throw new ConflictException(
-        'Ya existe un pago pendiente para esta obligación',
-      );
-    }
-
-    if (dto.method === PaymentMethod.BANK_TRANSFER && !dto.receiptNumber) {
-      throw new BadRequestException(
-        'El número de comprobante es obligatorio para transferencias bancarias',
-      );
-    }
-
-    const payment = await this.prisma.$transaction(async (tx) => {
-      const createdPayment = await tx.payment.create({
-        data: {
-          obligationId: obligation.id,
-          amount: obligation.amount,
-          method: dto.method,
-          status: PaymentStatus.PENDING,
-
-          receiptNumber:
-            dto.method === PaymentMethod.BANK_TRANSFER
-              ? dto.receiptNumber
-              : null,
+  async createManualPayment(dto: CreateManualPaymentDto, actorId = 'system') {
+    return serializable(this.prisma, async (tx) => {
+      const obligation = await tx.financialObligation.findUnique({
+        where: {
+          id: dto.obligationId,
         },
       });
 
-      if (dto.method === PaymentMethod.CASH) {
-        const year = new Date().getFullYear();
-
-        const generatedReceiptNumber = `CASH-${year}-${createdPayment.id.slice(0, 8).toUpperCase()}`;
-
-        return tx.payment.update({
-          where: {
-            id: createdPayment.id,
-          },
-          data: {
-            receiptNumber: generatedReceiptNumber,
-          },
-        });
+      if (!obligation) {
+        throw new NotFoundException('La obligación financiera no existe');
       }
 
-      return createdPayment;
-    });
+      if (
+        obligation.status === ObligationStatus.PAID ||
+        obligation.status === ObligationStatus.CACELLED
+      ) {
+        throw new BadRequestException(
+          'La obligación no puede recibir nuevos pagos',
+        );
+      }
 
-    return {
-      message: 'Pago manual registrado correctamente',
-      payment,
-    };
+      const existingPayment = await tx.payment.findFirst({
+        where: {
+          obligationId: obligation.id,
+          status: { in: [PaymentStatus.PENDING, PaymentStatus.APPROVED] },
+        },
+      });
+
+      if (existingPayment) {
+        throw new ConflictException(
+          'Ya existe un pago pendiente para esta obligación',
+        );
+      }
+
+      if (dto.method === PaymentMethod.BANK_TRANSFER && !dto.receiptNumber) {
+        throw new BadRequestException(
+          'El número de comprobante es obligatorio para transferencias bancarias',
+        );
+      }
+
+      const payment = await (async () => {
+        const createdPayment = await tx.payment.create({
+          data: {
+            obligationId: obligation.id,
+            amount: obligation.amount,
+            method: dto.method,
+            status: PaymentStatus.PENDING,
+
+            receiptNumber:
+              dto.method === PaymentMethod.BANK_TRANSFER
+                ? dto.receiptNumber
+                : null,
+          },
+        });
+
+        if (dto.method === PaymentMethod.CASH) {
+          const year = new Date().getFullYear();
+
+          const generatedReceiptNumber = `CASH-${year}-${createdPayment.id.slice(0, 8).toUpperCase()}`;
+
+          return tx.payment.update({
+            where: {
+              id: createdPayment.id,
+            },
+            data: {
+              receiptNumber: generatedReceiptNumber,
+            },
+          });
+        }
+
+        return createdPayment;
+      })();
+
+      await tx.auditEvent.create({
+        data: {
+          actorId,
+          action: 'PAYMENT_CREATED',
+          entityId: payment.id,
+          detail: 'Pago manual registrado pendiente de verificación',
+        },
+      });
+      return {
+        message: 'Pago manual registrado correctamente',
+        payment,
+      };
+    });
   }
 
   async verifyManualPayment(
@@ -326,88 +392,62 @@ export class PaymentsService {
     verifierUserId: string,
     dto: VerifyManualPaymentDto,
   ) {
-    const payment = await this.prisma.payment.findUnique({
-      where: {
-        id: paymentId,
-      },
-      include: {
-        obligation: true,
-      },
-    });
-
-    if (!payment) {
-      throw new NotFoundException('El pago no existe');
-    }
-
-    if (payment.method === PaymentMethod.ONLINE) {
-      throw new BadRequestException(
-        'Los pagos online son verificados automáticamente por MockPay',
-      );
-    }
-
-    if (payment.status !== PaymentStatus.PENDING) {
-      throw new ConflictException('Este pago ya fue verificado anteriormente');
-    }
-
-    if (dto.status === PaymentStatus.APPROVED) {
-      const result = await this.prisma.$transaction(async (tx) => {
-        const updatedPayment = await tx.payment.update({
-          where: {
-            id: payment.id,
-          },
-          data: {
-            status: PaymentStatus.APPROVED,
-            verifyBy: {
-              connect: {
-                id: verifierUserId,
-              },
-            },
-            verfiedAt: new Date(),
-          },
-        });
-
-        const updatedObligation = await tx.financialObligation.update({
-          where: {
-            id: payment.obligationId,
-          },
-          data: {
-            status: ObligationStatus.PAID,
-          },
-        });
-
-        return {
-          updatedPayment,
-          updatedObligation,
-        };
+    const result = await serializable(this.prisma, async (tx) => {
+      const payment = await tx.payment.findUnique({
+        where: { id: paymentId },
+        include: { obligation: true },
       });
-      await this.syncStudentDebtStatus(payment.obligation.studentId);
-
-      return {
-        message: 'Pago manual aprobado correctamente',
-        payment: result.updatedPayment,
-        obligation: result.updatedObligation,
-      };
-    }
-
-    const rejectedPayment = await this.prisma.payment.update({
-      where: {
-        id: payment.id,
-      },
-      data: {
-        status: PaymentStatus.REJECTED,
-        verifyBy: {
-          connect: {
-            id: verifierUserId,
-          },
+      if (!payment) throw new NotFoundException('El pago no existe');
+      if (payment.method === 'ONLINE')
+        throw new BadRequestException(
+          'Los pagos online son verificados automáticamente por MockPay',
+        );
+      if (payment.status !== 'PENDING')
+        throw new ConflictException(
+          'Este pago ya fue verificado anteriormente',
+        );
+      if (
+        payment.obligation.status === 'PAID' ||
+        payment.obligation.status === 'CACELLED'
+      )
+        throw new ConflictException(
+          'La obligación ya fue liquidada o cancelada',
+        );
+      const updatedPayment = await tx.payment.update({
+        where: { id: paymentId },
+        data: {
+          status: dto.status,
+          verifiedById: verifierUserId,
+          verfiedAt: new Date(),
         },
-        verfiedAt: new Date(),
-      },
+      });
+      const obligation =
+        dto.status === 'APPROVED'
+          ? await tx.financialObligation.update({
+              where: { id: payment.obligationId },
+              data: { status: 'PAID' },
+            })
+          : payment.obligation;
+      await tx.auditEvent.create({
+        data: {
+          actorId: verifierUserId,
+          action: 'PAYMENT_' + dto.status,
+          entityId: paymentId,
+          detail: 'Verificación manual de pago',
+        },
+      });
+      return {
+        message:
+          dto.status === 'APPROVED'
+            ? 'Pago manual aprobado correctamente'
+            : 'Pago manual rechazado correctamente',
+        payment: updatedPayment,
+        obligation,
+      };
     });
-
-    return {
-      message: 'Pago manual rechazado correctamente',
-      payment: rejectedPayment,
-    };
+    if (dto.status === 'APPROVED')
+      await this.syncStudentDebtStatus(result.obligation.studentId);
+    return result;
   }
 
   async syncStudentDebtStatus(studentId: string) {
@@ -523,63 +563,7 @@ export class PaymentsService {
       );
     }
 
-    const existingPayment = await this.prisma.payment.findFirst({
-      where: {
-        obligationId: obligation.id,
-        method: PaymentMethod.ONLINE,
-        status: PaymentStatus.PENDING,
-      },
-    });
-
-    if (existingPayment) {
-      throw new ConflictException(
-        'Ya existe una intención de pago pendiente para esta obligación',
-      );
-    }
-
-    const amount = Number(obligation.amount.toString());
-
-    const currency = this.configService.get<string>('MOCKPAY_CURRENCY', 'USD');
-
-    const mockPayPayment = await this.mockPayService.createPayment({
-      amount,
-      currency,
-      metadata: {
-        obligation_id: obligation.id,
-        student_id: obligation.studentId,
-      },
-      webhook_url:
-        `${this.configService.getOrThrow<string>('APP_BASE_URL')}` +
-        `/api/v1/payments/webhook?token=` +
-        encodeURIComponent(
-          this.configService.getOrThrow<string>('MOCKPAY_WEBHOOK_SECRET'),
-        ),
-    });
-
-    const payment = await this.prisma.payment.create({
-      data: {
-        obligationId: obligation.id,
-        amount: obligation.amount,
-        method: PaymentMethod.ONLINE,
-        status: PaymentStatus.PENDING,
-        externalReference: mockPayPayment.id,
-        gatewayResponse: {
-          id: mockPayPayment.id,
-          checkout_url: mockPayPayment.checkout_url,
-        },
-      },
-    });
-
-    return {
-      message: 'Intención de pago de matrícula creada correctamente',
-      payment: {
-        id: payment.id,
-        status: payment.status,
-        amount: payment.amount,
-        externalReference: payment.externalReference,
-      },
-      checkoutUrl: mockPayPayment.checkout_url,
-    };
+    return this.prepareCheckout(obligation.id, obligation.student.userId);
   }
 
   async getMyFinancialHistory(userId: string) {

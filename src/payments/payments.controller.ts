@@ -105,8 +105,11 @@ export class PaymentsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.RECEPCIONIST)
-  createManualPayment(@Body() dto: CreateManualPaymentDto) {
-    return this.paymentsService.createManualPayment(dto);
+  createManualPayment(
+    @Body() dto: CreateManualPaymentDto,
+    @Req() req: { user: { id: string } },
+  ) {
+    return this.paymentsService.createManualPayment(dto, req.user.id);
   }
 
   @ApiOperation({

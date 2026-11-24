@@ -29,7 +29,10 @@ function setup(status: UserStatus = UserStatus.ACTIVE, overdue = false) {
       findUnique: vi.fn().mockResolvedValue(payment),
       update: vi.fn().mockResolvedValue({}),
     },
-    financialObligation: { update: vi.fn().mockResolvedValue({}) },
+    financialObligation: {
+      update: vi.fn().mockResolvedValue({ studentId: 'student-1' }),
+    },
+    auditEvent: { create: vi.fn().mockResolvedValue({}) },
     $transaction: vi.fn(),
   };
   prisma.$transaction.mockImplementation((fn: (tx: typeof prisma) => unknown) =>
@@ -38,7 +41,11 @@ function setup(status: UserStatus = UserStatus.ACTIVE, overdue = false) {
   return {
     prisma,
     payment,
-    service: new PaymentsService(prisma as never, {} as never, {} as never),
+    service: new PaymentsService(
+      prisma as never,
+      {} as never,
+      { get: (_key: string, fallback: string) => fallback } as never,
+    ),
   };
 }
 const webhook = {
@@ -97,7 +104,8 @@ describe('Mora y pagos', () => {
     const { service, prisma, payment } = setup(UserStatus.SUSPEND_FOR_DEBT);
     payment.status = PaymentStatus.APPROVED;
     await service.handleMockPayWebhook(webhook);
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.payment.update).not.toHaveBeenCalled();
+    expect(prisma.auditEvent.create).not.toHaveBeenCalled();
     expect(prisma.user.update).toHaveBeenCalled();
   });
   it('rechaza monto incorrecto sin modificar datos', async () => {
@@ -105,7 +113,8 @@ describe('Mora y pagos', () => {
     await expect(
       service.handleMockPayWebhook({ ...webhook, amount: 1 }),
     ).rejects.toThrow('monto');
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.payment.update).not.toHaveBeenCalled();
+    expect(prisma.auditEvent.create).not.toHaveBeenCalled();
   });
   it.each([
     { obligation_id: 'ajena' },
@@ -117,7 +126,8 @@ describe('Mora y pagos', () => {
     await expect(
       service.handleMockPayWebhook({ ...webhook, metadata }),
     ).rejects.toThrow();
-    expect(prisma.$transaction).not.toHaveBeenCalled();
+    expect(prisma.payment.update).not.toHaveBeenCalled();
+    expect(prisma.auditEvent.create).not.toHaveBeenCalled();
   });
   it('acepta metadatos históricos para intenciones existentes', async () => {
     const { service } = setup();
